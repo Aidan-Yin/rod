@@ -17,7 +17,7 @@ import javax.crypto.spec.SecretKeySpec;
  * @description to use AES algorithm easily
  * @date 2023-7-16
  */
-public class AES{
+public class AES {
 
     private static Cipher cipher;
     private static String _mode;
@@ -27,15 +27,15 @@ public class AES{
 
     /**
      * 
-     * @param mode the AES mode you'd like to use 
-     * @param key the secret key you'd like to use
+     * @param mode the AES mode you'd like to use
+     * @param key  the secret key you'd like to use
      * @throws NoSuchAlgorithmException
      * @throws NoSuchPaddingException
      * @throws InvalidKeyException
      */
-    public AES(String mode, byte[] key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException{
+    public AES(String mode, byte[] key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
         // only mode ECB
-        if (!mode.equals("ECB")){
+        if (!mode.equals("ECB")) {
             throw new IllegalArgumentException("not a valid AES mode parameter");
         }
         cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
@@ -45,14 +45,14 @@ public class AES{
 
     /**
      * 
-     * @param mode the AES mode you are going to use 
-     * @param key the secret key you are going to use
-     * @param iv the Initialization Vector(IV) you are going to use
+     * @param mode the AES mode you are going to use
+     * @param key  the secret key you are going to use
+     * @param iv   the Initialization Vector(IV) you are going to use
      * @throws NoSuchAlgorithmException
      * @throws NoSuchPaddingException
      */
-    public AES(String mode, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException{
-        switch (mode){
+    public AES(String mode, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException {
+        switch (mode) {
             case "CBC":
                 cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
                 break;
@@ -76,8 +76,8 @@ public class AES{
      * @throws InvalidKeyException
      * @throws InvalidAlgorithmParameterException
      */
-    public void prepareToEncrypt() throws InvalidKeyException, InvalidAlgorithmParameterException{
-        switch (_mode){
+    public void prepareToEncrypt() throws InvalidKeyException, InvalidAlgorithmParameterException {
+        switch (_mode) {
             case "ECB":
                 cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(_key, "AES"));
                 break;
@@ -100,8 +100,8 @@ public class AES{
      * @throws InvalidKeyException
      * @throws InvalidAlgorithmParameterException
      */
-    public void prepareToDecrypt() throws InvalidKeyException, InvalidAlgorithmParameterException{
-        switch (_mode){
+    public void prepareToDecrypt() throws InvalidKeyException, InvalidAlgorithmParameterException {
+        switch (_mode) {
             case "ECB":
                 cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(_key, "AES"));
                 break;
@@ -121,34 +121,36 @@ public class AES{
     /**
      * 
      * @param data the data you are going to encrypt
-     * @return
+     * @return ciphertext
      * @throws IllegalBlockSizeException
      * @throws BadPaddingException
      */
-    public byte[] encrypt(byte[] data) throws IllegalBlockSizeException, BadPaddingException{
-        if (!toEncrypt){
+    public byte[] encrypt(byte[] data) throws IllegalBlockSizeException, BadPaddingException {
+        if (!toEncrypt) {
             throw new UnsupportedOperationException("Please use AES.prepareToEncrypt() first before encrypt");
         }
-        if (_mode.equals("GCM")){
+        if (_mode.equals("GCM")) {
             throw new IllegalArgumentException("Miss a parameter for GCM mode");
         }
         return cipher.doFinal(data);
     }
 
     /**
+     * GCM mode
      * 
      * @param data the data you are going to encrypt
-     * @param aad Additional Authenticated Data
+     * @param aad  Additional Authenticated Data
      * @return
      * @throws IllegalBlockSizeException
      * @throws BadPaddingException
      */
-    public byte[] encrypt(byte[] data, byte[] aad) throws IllegalBlockSizeException, BadPaddingException{
-        if (!toEncrypt){
+    public byte[] encrypt(byte[] data, byte[] aad) throws IllegalBlockSizeException, BadPaddingException {
+        if (!toEncrypt) {
             throw new UnsupportedOperationException("Please use AES.prepareToEncrypt() first before encrypt");
         }
-        if (!_mode.equals("GCM")){
-            throw new IllegalArgumentException("There is one redundant parameter(Only GCM mode need 2 parameter to encrypt data)");
+        if (!_mode.equals("GCM")) {
+            throw new IllegalArgumentException(
+                    "There is one redundant parameter(Only GCM mode need 2 parameter to encrypt data)");
         }
         cipher.updateAAD(aad);
         return cipher.doFinal(data);
@@ -157,34 +159,36 @@ public class AES{
     /**
      * 
      * @param data the data you are going to decrypt
-     * @return
+     * @return plaintext
      * @throws IllegalBlockSizeException
      * @throws BadPaddingException
      */
-    public byte[] decrypt(byte[] data) throws IllegalBlockSizeException, BadPaddingException{
-        if (toEncrypt){
+    public byte[] decrypt(byte[] data) throws IllegalBlockSizeException, BadPaddingException {
+        if (toEncrypt) {
             throw new UnsupportedOperationException("Please use AES.prepareToDecrypt() first before decrypt");
         }
-        if (_mode.equals("GCM")){
+        if (_mode.equals("GCM")) {
             throw new IllegalArgumentException("Miss a parameter for GCM mode");
         }
         return cipher.doFinal(data);
     }
 
     /**
+     * GCM mode
      * 
      * @param data the data you are going to decrypt
-     * @param add Additional Authenticated Data
+     * @param add  Additional Authenticated Data
      * @return
      * @throws IllegalBlockSizeException
      * @throws BadPaddingException
      */
-    public byte[] decrypt(byte[] data, byte[] aad) throws IllegalBlockSizeException, BadPaddingException{
-        if (toEncrypt){
+    public byte[] decrypt(byte[] data, byte[] aad) throws IllegalBlockSizeException, BadPaddingException {
+        if (toEncrypt) {
             throw new UnsupportedOperationException("Please use AES.prepareToDecrypt() first before decrypt");
         }
-        if (!_mode.equals("GCM")){
-            throw new IllegalArgumentException("There is one redundant parameter(Only GCM mode need 2 parameter to decrypt data)");
+        if (!_mode.equals("GCM")) {
+            throw new IllegalArgumentException(
+                    "There is one redundant parameter(Only GCM mode need 2 parameter to decrypt data)");
         }
         cipher.updateAAD(aad);
         return cipher.doFinal(data);

@@ -10,11 +10,13 @@ import javax.crypto.NoSuchPaddingException;
  * 
  * @author Yin
  * @className exampleToUseAES
- * @description to show how to use the AES class (uncommented a block to see the effect)
+ * @description to show how to use the AES class (uncommented a block to see the
+ *              effect)
  * @date 2023-7-16
  */
 public class exampleToUseAES {
-    public static void main(String[] args) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException{
+    public static void main(String[] args) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
         byte[] key = "0123456789abcdef".getBytes();
         byte[] iv = "0123456789abcdef".getBytes();
         byte[] data = "Hello, world!".getBytes();
@@ -65,7 +67,7 @@ public class exampleToUseAES {
         /**
          * OFB mode
          */
-         
+
         // // encrypt
         // AES aes = new AES("OFB", key, iv);
         // aes.prepareToEncrypt();
@@ -75,6 +77,6 @@ public class exampleToUseAES {
         // aes.prepareToDecrypt();
         // byte[] plaintext = aes.decrypt(ciphertext);
         // System.out.println(new String(plaintext));
-        
+
     }
 }
