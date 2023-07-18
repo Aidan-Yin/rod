@@ -2,7 +2,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import java.awt.FlowLayout;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
 
 /**
  * Sever UI implement
@@ -22,14 +23,28 @@ public class App extends JFrame {
      * @throws UnsupportedLookAndFeelException
      */
     public App() throws UnsupportedLookAndFeelException{
-        setTitle("Rod-Server");
-        setLayout(new FlowLayout());
+        setTitle("Rod-Client");
+
+
+        // layout
+        GridBagLayout gridBagLayout = new GridBagLayout();
+        setLayout(gridBagLayout);
+        
+        videoPanel = new JPanel();  // Video stream show
+
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 1;
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        constraints.fill = GridBagConstraints.BOTH;
+
+        add(videoPanel,constraints);
+
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        // Video stream show
-        videoPanel = new JPanel();
-        add(videoPanel);
-
         pack();
     }
 
@@ -41,9 +56,9 @@ public class App extends JFrame {
         try{
             App app = new App();
             app.setVisible(true);
-            VideoStreamReceiver vsr = new VideoStreamReceiver("127.0.0.1", 6969, app.getVideoPanel());
-            vsr.start();
-        }catch (UnsupportedLookAndFeelException e){
+            // VideoStreamReceiver vsr = new VideoStreamReceiver("127.0.0.1", 6969, app.getVideoPanel());
+            // vsr.start();
+        }catch (Exception e){
             e.printStackTrace();
         }
         
