@@ -18,16 +18,17 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 /**
+ * To generate and read different form of rsa key easily.<br>
+ * To encrypt and decrypt data with rsa algorithm easily.<br>
+ * To sign and verify with rsa easily.
+ * 
  * @author Yin
  * @className RSA
- * @description To generate and read different form of rsa key easily.<br>
- *              To encrypt and decrypt data with rsa algorithm easily.<br>
- *              TO sign and verify with rsa easily.
  * @date 2023-7-17
  */
 public class RSA {
-    public static PublicKey publicKey;
-    public static PrivateKey privateKey;
+    public PublicKey publicKey;
+    public PrivateKey privateKey;
 
     /**
      * 
@@ -285,7 +286,7 @@ public class RSA {
      * 
      * @param data       data to sign
      * @param privateKey
-     * @return signed data
+     * @return signature
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
      * @throws SignatureException
@@ -300,19 +301,19 @@ public class RSA {
 
     /**
      * 
-     * @param data       data to verify
-     * @param signedData signed data
+     * @param data      data to verify
+     * @param signature signature
      * @param publicKey
      * @return is the signature valid or not
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
      * @throws SignatureException
      */
-    public static boolean verify(byte[] data, byte[] signedData, PublicKey publicKey)
+    public static boolean verify(byte[] data, byte[] signature, PublicKey publicKey)
             throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        Signature signature = Signature.getInstance("SHA256withRSA");
-        signature.initVerify(publicKey);
-        signature.update(data);
-        return signature.verify(signedData);
+        Signature _signature = Signature.getInstance("SHA256withRSA");
+        _signature.initVerify(publicKey);
+        _signature.update(data);
+        return _signature.verify(signature);
     }
 }
