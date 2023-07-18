@@ -61,6 +61,5 @@ public class App extends JFrame {
         }catch (Exception e){
             e.printStackTrace();
         }
-        
     }
 }
