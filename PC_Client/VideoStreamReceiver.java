@@ -1,31 +1,51 @@
-import java.io.InputStream;
-import java.net.Socket;
 import javax.swing.JPanel;
+import javax.imageio.ImageIO;
 
-public class VideoStreamReceiver {
-    private static String _serverIP;
-    private static int _serverPort;
-    
-    private static JPanel _panel;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
-    public VideoStreamReceiver(String serverIP, int serverPort, JPanel panel) {
+
+
+public class VideoStreamReceiver extends JPanel{
+    public String _serverIP;
+    public int _serverPort;
+
+    private BufferedImage image;
+
+    public VideoStreamReceiver(){
+        setBackground(Color.BLACK);
+    } 
+    public VideoStreamReceiver(String serverIP, int serverPort) {
         _serverIP = serverIP;
-        _serverPort = serverPort;
-        _panel = panel;
+        _serverPort = serverPort;   
+
+        setBackground(Color.BLACK);
     }
 
-    public void start() {
+    public void setImageFromBytes(byte[] imageData) {
         try {
-            Socket socket = new Socket(_serverIP, _serverPort);
-            InputStream inputStream = socket.getInputStream();
-            byte[] buffer = new byte[4096];   //这个可能需要其他数据调整
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                //  这里想办法把视频流转化为图显示
-            }
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData);
+            image = ImageIO.read(inputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        repaint();
+    }
 
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (image != null) {
+            g.drawImage(image, 0, 0, getWidth(), getHeight(), null);
+        }
+    }
 
-            socket.close();
+    public void connect() {
+        try {
+            // 这里开始接收数据并转换为视频流播放
         } catch (Exception e) {
             e.printStackTrace();
         }
