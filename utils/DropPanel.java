@@ -5,7 +5,6 @@ import javax.swing.JTextPane;
 import javax.swing.JScrollPane;
 import javax.swing.JScrollBar;
 import javax.swing.JViewport;
-import javax.swing.SwingUtilities;
 
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDropEvent;

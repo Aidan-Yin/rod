@@ -1,7 +1,6 @@
 import javax.swing.JFrame;
 
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.GridBagConstraints;
 
 /**
@@ -61,12 +60,12 @@ public class TheClient extends UI {
         add(_rcmd,constraints);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setVisible(true);
     }
 
     public static void main(String[] args) {
         try{
             TheClient theClient = new TheClient();
+            theClient.setVisible(true);
         }catch (Exception e){
             e.printStackTrace();
         }
