@@ -1,6 +1,5 @@
 import javax.swing.JPanel;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JTextPane;
 import javax.swing.JScrollPane;
 import javax.swing.JScrollBar;
@@ -12,14 +11,25 @@ import java.util.ArrayList;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 
+/**
+ * A session window for text, file transfer and recording.
+ * 
+ * @author a-lives
+ * @className DropPanel
+ * @version 1.0
+ * @date 2023-7-22
+ */
+
 public class DropPanel extends JPanel {
 
+    private String user;
     private JScrollPane _DialogArea;
     private JTextPane _inputArea;
     private JButton _sendButton;
     private ArrayList<String> _HTMLContent;
 
     public DropPanel(String UItype) {
+        user = UItype;
         JTextPane DialogInit = new JTextPane();
         DialogInit.setEditable(false);
         _inputArea = new JTextPane();
@@ -40,7 +50,7 @@ public class DropPanel extends JPanel {
         DialogInit.setText(bulidHTML());
 
         _sendButton.addActionListener(e -> {
-            addText(UItype, _inputArea.getText());
+            sendText();
         });
 
         GridBagConstraints constraints = new GridBagConstraints();
@@ -69,13 +79,12 @@ public class DropPanel extends JPanel {
     }
 
     private static String escapeHTML(String html) {
-        // 使用HTML实体编码转义特殊字符和HTML标签
         return html.replace("&", "&amp;")
-                   .replace("<", "&lt;")
-                   .replace(">", "&gt;")
-                   .replace("\"", "&quot;")
-                   .replace("'", "&apos;")
-                   .replace("\n","<br>");
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&apos;")
+                .replace("\n", "<br>");
     }
 
     private String bulidHTML() {
@@ -88,8 +97,12 @@ public class DropPanel extends JPanel {
         return html;
     }
 
-
-    public void addText(String user, String content) {
+    /**
+     * Add text to DialogArea.
+     * 
+     * @param content
+     */
+    public void addText(String content) {
 
         _HTMLContent.add("<p><b>" + user + ": </b>" + escapeHTML(content) + "</p>");
         JViewport jv = _DialogArea.getViewport();
@@ -99,18 +112,29 @@ public class DropPanel extends JPanel {
         vScrollBar.setValue(vScrollBar.getMaximum());
     }
 
-    public void addImg(String user, String url) {
+    /**
+     * Add img to DialogArea.
+     * 
+     * @param url
+     */
+    public void addImg(String url) {
 
     }
 
-    // public static void main(String[] args) {
-    //     SwingUtilities.invokeLater(() -> {
-    //         JFrame frame = new JFrame("Drop Panel");
-    //         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    //         frame.setSize(400, 300);
-    //         frame.add(new DropPanel(UI.SERVER));
-    //         frame.setVisible(true);
-    //     });
-    // }
+    /**
+     * Send text to the other end
+     * 
+     */
+    public void sendText() {
+        addText(_inputArea.getText());
 
+    }
+
+    /**
+     * Send file to the other end
+     * 
+     */
+    public void sendFile() {
+
+    }
 }

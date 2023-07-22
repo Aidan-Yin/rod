@@ -4,12 +4,12 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 
 /**
- * Sever UI implement
+ * Client UI implement
  * 
  * @author a-lives
  * @className TheClient
  * @version 1.0
- * @date 2023-7-18
+ * @date 2023-7-22
  */
 
 public class TheClient extends UI {
@@ -17,12 +17,12 @@ public class TheClient extends UI {
     private RemoteCMD _rcmd;
     private VideoStreamReceiver _vsr;
 
-    /** 
-     *Initialization
-     *  
+    /**
+     * Initialization
+     * 
      * @throws Exception
      */
-    public TheClient() throws Exception{
+    public TheClient() throws Exception {
         super(UI.CLIENT);
 
         _rcmd = new RemoteCMD();
@@ -43,30 +43,30 @@ public class TheClient extends UI {
         constraints.gridwidth = 1;
         constraints.gridheight = 2;
         constraints.fill = GridBagConstraints.BOTH;
-        add(_dropPanel,constraints);
+        add(_dropPanel, constraints);
 
         constraints.gridx = 0;
         constraints.gridy = 0;
         constraints.gridwidth = 1;
         constraints.gridheight = 1;
         constraints.fill = GridBagConstraints.BOTH;
-        add(_vsr,constraints);
+        add(_vsr, constraints);
 
         constraints.gridx = 0;
         constraints.gridy = 1;
         constraints.gridwidth = 1;
         constraints.gridheight = 1;
         constraints.fill = GridBagConstraints.BOTH;
-        add(_rcmd,constraints);
+        add(_rcmd, constraints);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     public static void main(String[] args) {
-        try{
+        try {
             TheClient theClient = new TheClient();
             theClient.setVisible(true);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

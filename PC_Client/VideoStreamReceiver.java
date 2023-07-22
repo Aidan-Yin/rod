@@ -7,31 +7,39 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+/**
+ * A control that is responsible for playing the server screen.
+ * 
+ * @author a-lives
+ * @className RemoteCMD
+ * @version 1.0
+ * @date 2023-7-22
+ */
 
+public class VideoStreamReceiver extends JPanel {
 
-public class VideoStreamReceiver extends JPanel{
     public String _serverIP;
     public int _serverPort;
-
     private BufferedImage image;
 
-    public VideoStreamReceiver(){
-        setBackground(Color.BLACK);
-    } 
-    public VideoStreamReceiver(String serverIP, int serverPort) {
-        _serverIP = serverIP;
-        _serverPort = serverPort;   
-
+    /**
+     * Initialization
+     * 
+     * @throws Exception
+     */
+    public VideoStreamReceiver() throws Exception {
         setBackground(Color.BLACK);
     }
 
-    public void setImageFromBytes(byte[] imageData) {
-        try {
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData);
-            image = ImageIO.read(inputStream);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    /**
+     * Your own watch
+     * 
+     * @param imageData
+     * @throws IOException
+     */
+    private void setImageFromBytes(byte[] imageData) throws IOException {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData);
+        image = ImageIO.read(inputStream);
         repaint();
     }
 
@@ -43,12 +51,12 @@ public class VideoStreamReceiver extends JPanel{
         }
     }
 
-    public void connect() {
-        try {
-            // 这里开始接收数据并转换为视频流播放
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    /**
+     * Your own watch
+     * 
+     * @throws Exception
+     */
+    public void connect() throws Exception {
+        // 这里开始接收数据并转换为视频流播放
     }
 }
-

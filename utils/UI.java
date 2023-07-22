@@ -18,6 +18,12 @@ public class UI extends JFrame {
     public DropPanel _dropPanel;
     private final Dimension screensize = Toolkit.getDefaultToolkit().getScreenSize();
 
+    /**
+     * Initalization
+     * 
+     * @param UItype UI.SERVER or UI.CLIENT
+     * @throws Exception
+     */
     public UI(String UItype) throws Exception {
         super(UItype);
 
