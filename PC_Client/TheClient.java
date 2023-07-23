@@ -12,10 +12,11 @@ import java.awt.GridBagConstraints;
  * @date 2023-7-22
  */
 
-public class TheClient extends UI {
+public class TheClient extends UIFrame {
 
     private RemoteCMD _rcmd;
     private VideoStreamReceiver _vsr;
+    private DropPanel _dropPanel;
 
     /**
      * Initialization
@@ -23,11 +24,11 @@ public class TheClient extends UI {
      * @throws Exception
      */
     public TheClient() throws Exception {
-        super(UI.CLIENT);
+        super("Rod-Client",0.7,0.7 );
 
         _rcmd = new RemoteCMD();
         _vsr = new VideoStreamReceiver();
-        _dropPanel = new DropPanel(UI.CLIENT);
+        _dropPanel = new DropPanel("Rod-Client");
 
         // initalize GridBagLayout
         GridBagLayout gridBagLayout = new GridBagLayout();

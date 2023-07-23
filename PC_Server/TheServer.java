@@ -1,4 +1,3 @@
-import javax.swing.JFrame;
 
 /**
  * The server can receive files/commands from the client, access local files,
@@ -10,27 +9,12 @@ import javax.swing.JFrame;
  * @date 2023-7-22
  */
 
-public class TheServer extends UI {
+public class TheServer{
 
     /**
      * Initialization
      * 
      * @throws Exception
      */
-    public TheServer() throws Exception {
-        super(UI.SERVER);
-        _dropPanel = new DropPanel(UI.SERVER);
-        add(_dropPanel);
 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    }
-
-    public static void main(String[] args) {
-        try {
-            TheServer theServer = new TheServer();
-            theServer.setVisible(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

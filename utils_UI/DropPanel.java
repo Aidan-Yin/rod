@@ -22,14 +22,14 @@ import java.awt.GridBagConstraints;
 
 public class DropPanel extends JPanel {
 
-    private String user;
+    private String _user;
     private JScrollPane _DialogArea;
     private JTextPane _inputArea;
     private JButton _sendButton;
     private ArrayList<String> _HTMLContent;
 
-    public DropPanel(String UItype) {
-        user = UItype;
+    public DropPanel(String user) {
+        _user = user;
         JTextPane DialogInit = new JTextPane();
         DialogInit.setEditable(false);
         _inputArea = new JTextPane();
@@ -104,7 +104,7 @@ public class DropPanel extends JPanel {
      */
     public void addText(String content) {
 
-        _HTMLContent.add("<p><b>" + user + ": </b>" + escapeHTML(content) + "</p>");
+        _HTMLContent.add("<p><b>" + _user + ": </b>" + escapeHTML(content) + "</p>");
         JViewport jv = _DialogArea.getViewport();
         JTextPane jtp = (JTextPane) jv.getView();
         jtp.setText(bulidHTML());
