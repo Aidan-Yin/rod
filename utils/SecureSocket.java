@@ -1,3 +1,6 @@
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -22,7 +25,7 @@ import javax.crypto.NoSuchPaddingException;
  * 
  * @author Yin
  * @className SecureSocket
- * @date 2023-7-18
+ * @date 2023-7-23
  */
 public class SecureSocket {
     public Socket _socket;
@@ -122,7 +125,6 @@ public class SecureSocket {
         byte[] aad = new byte[32];
         random.nextBytes(iv);
         random.nextBytes(aad);
-
         byte[] ciphertext = aes.encrypt(data, iv, aad);
         _outputStream.write(ArrayUtils.intToBytes(iv.length + aad.length + ciphertext.length));
         _outputStream.write(iv);
@@ -150,6 +152,72 @@ public class SecureSocket {
         aad = Arrays.copyOfRange(rawData, 96, 128);
         byte[] ciphertext = Arrays.copyOfRange(rawData, 128, length);
         return aes.decrypt(ciphertext, iv, aad);
+    }
+
+    /**
+     * Send file with secure socket, support large file
+     * 
+     * @param filePath the path of the file you want to send
+     * @throws IOException
+     * @throws InvalidKeyException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     * @throws InvalidAlgorithmParameterException
+     */
+    public void sendFile(String filePath) throws IOException, InvalidKeyException, IllegalBlockSizeException,
+            BadPaddingException, InvalidAlgorithmParameterException {
+        File file = new File(filePath);
+        FileInputStream inputStream = new FileInputStream(file);
+        long size = file.length();
+        if (size <= 128 * 1024 * 1024) { // less than 128MB: small file
+            // send file size
+            sendall(ArrayUtils.longToBytes(size));
+
+            // read file and send it
+            byte[] data = new byte[(int) size];
+            inputStream.read(data);
+            sendall(data);
+        } else { // more than 128MB: large file
+                 // send file size
+            sendall(ArrayUtils.longToBytes(size));
+            // read file and send it
+            byte[] buffer = new byte[128 * 1024 * 1024]; // 128MB
+            int read = inputStream.read(buffer);
+            while (read == 128 * 1024 * 1024) { // haven't to the end
+                sendall(buffer);
+                read = inputStream.read(buffer);
+            }
+            byte[] lastBuffer = new byte[read];
+            System.arraycopy(buffer, 0, lastBuffer, 0, read);
+            sendall(lastBuffer);
+        }
+        inputStream.close();
+    }
+
+    /**
+     * receive file send by sendFile(), support large file
+     * 
+     * @param savePath the path you want to save the file
+     * @throws InvalidKeyException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     * @throws InvalidAlgorithmParameterException
+     * @throws IOException
+     */
+    public void recvFile(String savePath) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
+            InvalidAlgorithmParameterException, IOException {
+        File file = new File(savePath);
+        FileOutputStream outputStream = new FileOutputStream(file);
+        long size = ArrayUtils.bytesToLong(recvall());
+        if (size <= 128 * 1024 * 1024) { // less than 128MB: small file
+            outputStream.write(recvall());
+        } else { // more than 128MB: large file
+            int loops = (int) size / (128 * 1024 * 1024) + 1;
+            for (int i = 0; i < loops; i++) {
+                outputStream.write(recvall());
+            }
+        }
+        outputStream.close();
     }
 
     /**
