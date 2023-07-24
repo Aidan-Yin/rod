@@ -25,13 +25,17 @@ public class socketExampleServer {
         SecureServerSocket serverSocket = new SecureServerSocket(publicKey, privateKey,8080);
         String[] validClients = {"MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAlXFBhw7G0bpbtUOe5BPMxq11WtpJkVWOx5biiPX7GySeCHV6uoCip127E6j1L/XqHTDzErm93G/6eEtntjt7IvD9RoYkloBZLfevNuo7NzqFuIJu3y/y/u73mHC9sVU4mNuse93yPuMio+GEiKaDcrIFZmxXkeyhVnCxcXA+ISc2I/Ripwo19oahlihSMgNZP5IPDCGahASk3414eyk/W8asGTvN11PiEW+8xNFfwjDF9pBiIAOZaRk6HvhLQTJhQKN9sKy+333FffihS387R8IU1WevF8q8CUkNbq7FBFFUJDketaALABXSGgExW9KQdaHiDyps7XNHcQzOxre7VjPUACHuUgefS7a6bM5zVU3bjizD0PtaglwFNje47D4jvF6qgu8MSf1ZTqv5EWH/PpW/T39K11tJFGI3yAfyQzmyFqPOZqq1zBNcC5F2CFKp26td9z1+a86jBTqJ8crfeqOE26LdiB2esBAC0E1oIpC/HAvMZoMo2Cb320rL6zHwfaqmV3yE8M2BNj1RODmgZTVsOSmoLgPijdigB/PIEXt2OwLuBq4WXO5AH095xy591BISeTYaePyMOlKsGZtR2wnlcbNRx2D+gi9pkRWbbFhaHwy8RP8oOjf4qV1DHTrutB3d/KLo7CpCAN8dOftmpAswc6+++kVnV/SqW7FDCWMCAwEAAQ=="};
         while (true){
+            System.out.println("a");
             SecureSocket secureSocket = serverSocket.accept(validClients);
+            System.out.println("accepted");
             new Thread(new Runnable() {
                 @Override
                 public void run(){
                     try {
-                        byte[] data = secureSocket.recvall();
-                        System.out.println(new String(data));
+                        // byte[] data = secureSocket.recvall();
+                        // System.out.println(new String(data));
+                        System.out.println("Sended");
+                        secureSocket.sendall("Hello, client!".getBytes());
                         secureSocket.sendall("Hello, client!".getBytes());
                     } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
                             | InvalidAlgorithmParameterException | IOException e) {
