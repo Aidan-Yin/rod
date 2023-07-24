@@ -114,9 +114,8 @@ public class TheServer {
         String[] ss = new String(signal).split(",");
         System.out.println(new String(signal));
         System.out.println(_screenWidth+","+_screenHeight);
-        int x = (int)(Integer.parseInt(ss[0])/Integer.parseInt(ss[2])*_screenWidth);
-        int y = (int)(Integer.parseInt(ss[1])/Integer.parseInt(ss[3])*_screenHeight);
-        System.out.println(x+"," +y);
+        int x = (int)(Integer.parseInt(ss[0])*_screenWidth/Integer.parseInt(ss[2]));
+        int y = (int)(Integer.parseInt(ss[1])*_screenHeight/Integer.parseInt(ss[3]));
         int button = switch(ss[4]){
             case "L" -> InputEvent.BUTTON1_DOWN_MASK;
             case "M" -> InputEvent.BUTTON2_DOWN_MASK;

@@ -41,7 +41,6 @@ public class VideoPlayer extends JPanel {
             public void mousePressed(MouseEvent e) {
                 int x = e.getX();
                 int y = e.getY();
-                System.out.println("origin-P:"+x+","+y);
                 int h = VideoPlayer.this.getHeight();
                 int w = VideoPlayer.this.getWidth();
                 String button = switch (e.getButton()) {
@@ -67,7 +66,6 @@ public class VideoPlayer extends JPanel {
             public void mouseReleased(MouseEvent e) {
                 int x = e.getX();
                 int y = e.getY();
-                System.out.println("origin-R:"+x+","+y);
                 int h = VideoPlayer.this.getHeight();
                 int w = VideoPlayer.this.getWidth();
                 String button = switch (e.getButton()) {
@@ -93,11 +91,7 @@ public class VideoPlayer extends JPanel {
         addMouseMotionListener(new MouseMotionListener() {
             @Override
             public void mouseDragged(MouseEvent e){
-            }
-            @Override
-            public void mouseMoved(MouseEvent e) {
                 int b = e.getButton();
-                if(b==MouseEvent.NOBUTTON)return;
                 String button = switch (b) {
                     case MouseEvent.BUTTON1 -> "L";
                     case MouseEvent.BUTTON2 -> "M";
@@ -106,7 +100,6 @@ public class VideoPlayer extends JPanel {
                 };
                 int x = e.getX();
                 int y = e.getY();
-                System.out.println("origin-D:"+x+","+y);
                 int h = VideoPlayer.this.getHeight();
                 int w = VideoPlayer.this.getWidth();
                 String signal = "" + x + "," + y + "," + w + "," + h + "," + button + "," + "M";
@@ -121,6 +114,10 @@ public class VideoPlayer extends JPanel {
                     }
 
                 }).start();
+            }
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                
             }
         });
     }
