@@ -24,7 +24,7 @@ import javax.crypto.NoSuchPaddingException;
  * 
  * @author Yin
  * @className RSA
- * @date 2023-7-17
+ * @date 2023-7-25
  */
 public class RSA {
     public PublicKey publicKey;
@@ -257,7 +257,7 @@ public class RSA {
      */
     public static byte[] encrypt(byte[] data, PublicKey publicKey) throws NoSuchAlgorithmException,
             NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Cipher cipher = Cipher.getInstance("RSA");
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.ENCRYPT_MODE, publicKey);
         byte[] result = cipher.doFinal(data);
         return result;
@@ -276,7 +276,7 @@ public class RSA {
      */
     public static byte[] decrypt(byte[] data, PrivateKey privateKey) throws NoSuchAlgorithmException,
             NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Cipher cipher = Cipher.getInstance("RSA");
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.DECRYPT_MODE, privateKey);
         byte[] result = cipher.doFinal(data);
         return result;
