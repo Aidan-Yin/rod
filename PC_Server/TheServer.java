@@ -53,6 +53,10 @@ public class TheServer {
     private static SecureSocket _secureSocket_mouse;
     private static int _port_mouse;
 
+    private static SecureServerSocket _serverSocket_cmd;
+    private static SecureSocket _secureSocket_cmd;
+    private static int _port_cmd;
+
     private static double _screenHeight;
     private static double _screenWidth;
     private static Rectangle _screenRect;
@@ -76,6 +80,9 @@ public class TheServer {
         _vaildClients = prop.getProperty("vaildClients",
                 "MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAlXFBhw7G0bpbtUOe5BPMxq11WtpJkVWOx5biiPX7GySeCHV6uoCip127E6j1L/XqHTDzErm93G/6eEtntjt7IvD9RoYkloBZLfevNuo7NzqFuIJu3y/y/u73mHC9sVU4mNuse93yPuMio+GEiKaDcrIFZmxXkeyhVnCxcXA+ISc2I/Ripwo19oahlihSMgNZP5IPDCGahASk3414eyk/W8asGTvN11PiEW+8xNFfwjDF9pBiIAOZaRk6HvhLQTJhQKN9sKy+333FffihS387R8IU1WevF8q8CUkNbq7FBFFUJDketaALABXSGgExW9KQdaHiDyps7XNHcQzOxre7VjPUACHuUgefS7a6bM5zVU3bjizD0PtaglwFNje47D4jvF6qgu8MSf1ZTqv5EWH/PpW/T39K11tJFGI3yAfyQzmyFqPOZqq1zBNcC5F2CFKp26td9z1+a86jBTqJ8crfeqOE26LdiB2esBAC0E1oIpC/HAvMZoMo2Cb320rL6zHwfaqmV3yE8M2BNj1RODmgZTVsOSmoLgPijdigB/PIEXt2OwLuBq4WXO5AH095xy591BISeTYaePyMOlKsGZtR2wnlcbNRx2D+gi9pkRWbbFhaHwy8RP8oOjf4qV1DHTrutB3d/KLo7CpCAN8dOftmpAswc6+++kVnV/SqW7FDCWMCAwEAAQ==")
                 .split(",");
+        _port_video = Integer.parseInt(prop.getProperty("port_video", "8080"));
+        _port_mouse = Integer.parseInt(prop.getProperty("port_video", "8081"));
+        _port_cmd = Integer.parseInt(prop.getProperty("port_cmd", "8082"));
 
         // useful robot
         Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
@@ -84,17 +91,10 @@ public class TheServer {
         _screenWidth = d.getWidth();
         _robot = new Robot();
 
-        // socket for video
-        _port_video = Integer.parseInt(prop.getProperty("port_video", "8080"));
-        _serverSocket_video = new SecureServerSocket(_publicKey, _privateKey, _port_video);
-
-        // socket for mouse
-        _port_mouse = Integer.parseInt(prop.getProperty("port_video", "8081"));
-        _serverSocket_mouse = new SecureServerSocket(_publicKey, _privateKey, _port_mouse);
         log("Loaded settings");
     }
 
-    public static byte[] getScreen() throws IOException {        
+    public static byte[] getScreen() throws IOException {
         BufferedImage bufferedImage = _robot.createScreenCapture(_screenRect);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(bufferedImage, "png", baos);
@@ -110,27 +110,25 @@ public class TheServer {
         return ba;
     }
 
-    public static void mouseDo(byte[] signal){
+    public static void mouseDo(byte[] signal) {
         String[] ss = new String(signal).split(",");
-        System.out.println(new String(signal));
-        System.out.println(_screenWidth+","+_screenHeight);
-        int x = (int)(Integer.parseInt(ss[0])*_screenWidth/Integer.parseInt(ss[2]));
-        int y = (int)(Integer.parseInt(ss[1])*_screenHeight/Integer.parseInt(ss[3]));
-        int button = switch(ss[4]){
+        int x = (int) (Integer.parseInt(ss[0]) * _screenWidth / Integer.parseInt(ss[2]));
+        int y = (int) (Integer.parseInt(ss[1]) * _screenHeight / Integer.parseInt(ss[3]));
+        int button = switch (ss[4]) {
             case "L" -> InputEvent.BUTTON1_DOWN_MASK;
             case "M" -> InputEvent.BUTTON2_DOWN_MASK;
             case "R" -> InputEvent.BUTTON3_DOWN_MASK;
             default -> InputEvent.BUTTON1_DOWN_MASK;
         };
-        switch(ss[5]){
-            case "P"->{
+        switch (ss[5]) {
+            case "P" -> {
                 _robot.mouseMove(x, y);
                 _robot.mousePress(button);
             }
-            case "D"->{
+            case "D" -> {
                 _robot.mouseMove(x, y);
             }
-            case "R"->{
+            case "R" -> {
                 _robot.mouseMove(x, y);
                 _robot.mouseRelease(button);
             }
@@ -147,6 +145,7 @@ public class TheServer {
             @Override
             public void run() {
                 try {
+                    _serverSocket_video = new SecureServerSocket(_publicKey, _privateKey, _port_video);
                     _secureSocket_video = _serverSocket_video.accept(_vaildClients);
                     log("Connected with Client: video");
                 } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
@@ -170,8 +169,9 @@ public class TheServer {
         // Mouse Socket
         new Thread(new Runnable() {
             @Override
-            public void run(){
+            public void run() {
                 try {
+                    _serverSocket_mouse = new SecureServerSocket(_publicKey, _privateKey, _port_mouse);
                     _secureSocket_mouse = _serverSocket_mouse.accept(_vaildClients);
                     log("Connected with Client: Mouse");
                 } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
@@ -190,6 +190,30 @@ public class TheServer {
                 }
             }
         }).start();
+
+        // CMD Socket
+        // new Thread(new Runnable() {
+        //     @Override
+        //     public void run() {
+        //         try {
+        //             _secureSocket_cmd = _serverSocket_cmd.accept(_vaildClients);
+        //             _serverSocket_cmd = new SecureServerSocket(_publicKey, _privateKey, _port_cmd);
+        //             log("Connected with Client: CMD");
+        //         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
+        //                 | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException | SignatureException
+        //                 | IOException e) {
+        //             e.printStackTrace();
+        //         }
+        //         while (true) {
+        //             try {
+        //                 byte[] signal = _secureSocket_cmd.recvall();
+        //             } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+        //                     | InvalidAlgorithmParameterException | IOException e) {
+        //                 e.printStackTrace();
+        //             }
+        //         }
+        //     }
+        // }).start();
 
     }
 }
