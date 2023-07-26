@@ -10,6 +10,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.PrivateKey;
+import java.util.Queue;
+import java.util.ArrayDeque;
 
 /**
  * A control that is responsible for playing the server screen.
@@ -24,6 +26,7 @@ public class VideoPlayer extends JPanel {
 
     private BufferedImage image;
     private SecureSocket _socket;
+    private Queue<String> _mouseQueue;
 
     /**
      * Initialization
@@ -33,14 +36,16 @@ public class VideoPlayer extends JPanel {
     public VideoPlayer(PrivateKey privateKey, String serverIP, int serverPort) throws Exception {
         setBackground(Color.BLACK);
         _socket = new SecureSocket(privateKey, serverIP, serverPort);
+        _mouseQueue = new ArrayDeque<>();
         addMouseTracker();
+        addMouseEventSender();;
     }
 
     /**
      * Add mousetracker to track mouseEvents and send signal to client.
      * 
      */
-    public void addMouseTracker(){
+    public void addMouseTracker() {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -55,18 +60,9 @@ public class VideoPlayer extends JPanel {
                     default -> "L";
                 };
                 String signal = "" + x + "," + y + "," + w + "," + h + "," + button + "," + "P";
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            _socket.sendall(signal.getBytes());
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                }).start();
+                _mouseQueue.offer(signal);
             }
+
             @Override
             public void mouseReleased(MouseEvent e) {
                 int x = e.getX();
@@ -80,22 +76,12 @@ public class VideoPlayer extends JPanel {
                     default -> "L";
                 };
                 String signal = "" + x + "," + y + "," + w + "," + h + "," + button + "," + "R";
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            _socket.sendall(signal.getBytes());
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                }).start();
+                _mouseQueue.offer(signal);
             }
         });
         addMouseMotionListener(new MouseMotionListener() {
             @Override
-            public void mouseDragged(MouseEvent e){
+            public void mouseDragged(MouseEvent e) {
                 int b = e.getButton();
                 String button = switch (b) {
                     case MouseEvent.BUTTON1 -> "L";
@@ -108,23 +94,39 @@ public class VideoPlayer extends JPanel {
                 int h = VideoPlayer.this.getHeight();
                 int w = VideoPlayer.this.getWidth();
                 String signal = "" + x + "," + y + "," + w + "," + h + "," + button + "," + "M";
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
+                _mouseQueue.offer(signal);
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+
+            }
+        });
+    }
+
+    public void addMouseEventSender() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        Thread.sleep(20);
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    if (!_mouseQueue.isEmpty()) {
                         try {
+                            String signal = _mouseQueue.poll();
                             _socket.sendall(signal.getBytes());
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
+                }
+            }
 
-                }).start();
-            }
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                
-            }
-        });
+        }).start();
     }
 
     /**
