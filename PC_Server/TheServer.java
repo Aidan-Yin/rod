@@ -62,11 +62,26 @@ public class TheServer {
     private static double _screenWidth;
     private static Rectangle _screenRect;
 
+    /**
+     * make log
+     * 
+     * @param msg
+     */
     public static void log(String msg) {
         Date date = new Date();
         System.out.println("[" + date.toString() + "] " + msg);
     }
 
+    /**
+     * load settings
+     * 
+     * @param path
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeySpecException
+     * @throws FileNotFoundException
+     * @throws IOException
+     * @throws AWTException
+     */
     public static void loadSettingFromProp(String path)
             throws NoSuchAlgorithmException, InvalidKeySpecException, FileNotFoundException, IOException, AWTException {
         Properties prop = new Properties();
@@ -95,10 +110,17 @@ public class TheServer {
         log("Loaded settings");
     }
 
-    public static byte[] getScreen() throws IOException {
+    /**
+     * use to get screen
+     * 
+     * @param scale < 1 ,scale image
+     * @return
+     * @throws IOException
+     */
+    public static byte[] getScreen(double scale) throws IOException {
         BufferedImage bufferedImage = _robot.createScreenCapture(_screenRect);
-        int newWidth = (int) (_screenWidth * 0.8);
-        int newHeight = (int) (_screenHeight * 0.8);
+        int newWidth = (int) (_screenWidth * scale);
+        int newHeight = (int) (_screenHeight * scale);
         BufferedImage lowerResolutionImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = lowerResolutionImage.createGraphics();
         g2d.drawImage(bufferedImage, 0, 0, newWidth, newHeight, null);
@@ -109,14 +131,33 @@ public class TheServer {
         return ba;
     }
 
-    public static byte[] getScreen(Rectangle rect) throws IOException {
+    /**
+     * use to get screen
+     * 
+     * @param scale < 1 ,scale image
+     * @param rect 
+     * @return
+     * @throws IOException
+     */
+    public static byte[] getScreen(double scale, Rectangle rect) throws IOException {
         BufferedImage bufferedImage = _robot.createScreenCapture(rect);
+        int newWidth = (int) (_screenWidth * scale);
+        int newHeight = (int) (_screenHeight * scale);
+        BufferedImage lowerResolutionImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = lowerResolutionImage.createGraphics();
+        g2d.drawImage(bufferedImage, 0, 0, newWidth, newHeight, null);
+        g2d.dispose();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(bufferedImage, "png", baos);
+        ImageIO.write(lowerResolutionImage, "png", baos);
         byte[] ba = baos.toByteArray();
         return ba;
     }
 
+    /**
+     * Do mouse event with the signal from client
+     * 
+     * @param signal 
+     */
     public static void mouseDo(byte[] signal) {
         String[] ss = new String(signal).split(",");
         int x = (int) (Integer.parseInt(ss[0]) * _screenWidth / Integer.parseInt(ss[2]));
@@ -165,7 +206,7 @@ public class TheServer {
                     try {
                         if (_secureSocket_video.isClosed())
                             break;
-                        _secureSocket_video.sendall(getScreen());
+                        _secureSocket_video.sendall(getScreen(0.8));
                         Thread.sleep(20);
                     } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
                             | InvalidAlgorithmParameterException | IOException | InterruptedException e) {
