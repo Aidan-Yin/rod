@@ -19,6 +19,7 @@ import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.awt.AWTException;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.event.InputEvent;
 
@@ -96,8 +97,14 @@ public class TheServer {
 
     public static byte[] getScreen() throws IOException {
         BufferedImage bufferedImage = _robot.createScreenCapture(_screenRect);
+        int newWidth = (int) (_screenWidth * 0.8);
+        int newHeight = (int) (_screenHeight * 0.8);
+        BufferedImage lowerResolutionImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = lowerResolutionImage.createGraphics();
+        g2d.drawImage(bufferedImage, 0, 0, newWidth, newHeight, null);
+        g2d.dispose();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(bufferedImage, "png", baos);
+        ImageIO.write(lowerResolutionImage, "png", baos);
         byte[] ba = baos.toByteArray();
         return ba;
     }
@@ -156,11 +163,14 @@ public class TheServer {
                 log("Begined to send screenshot");
                 while (true) {
                     try {
+                        if (_secureSocket_video.isClosed())
+                            break;
                         _secureSocket_video.sendall(getScreen());
                         Thread.sleep(20);
                     } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
                             | InvalidAlgorithmParameterException | IOException | InterruptedException e) {
                         e.printStackTrace();
+                        break;
                     }
                 }
             }
@@ -181,11 +191,14 @@ public class TheServer {
                 }
                 while (true) {
                     try {
+                        if (_secureSocket_mouse.isClosed())
+                            break;
                         byte[] signal = _secureSocket_mouse.recvall();
                         mouseDo(signal);
                     } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
                             | InvalidAlgorithmParameterException | IOException e) {
                         e.printStackTrace();
+                        break;
                     }
                 }
             }
@@ -193,26 +206,30 @@ public class TheServer {
 
         // CMD Socket
         // new Thread(new Runnable() {
-        //     @Override
-        //     public void run() {
-        //         try {
-        //             _secureSocket_cmd = _serverSocket_cmd.accept(_vaildClients);
-        //             _serverSocket_cmd = new SecureServerSocket(_publicKey, _privateKey, _port_cmd);
-        //             log("Connected with Client: CMD");
-        //         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
-        //                 | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException | SignatureException
-        //                 | IOException e) {
-        //             e.printStackTrace();
-        //         }
-        //         while (true) {
-        //             try {
-        //                 byte[] signal = _secureSocket_cmd.recvall();
-        //             } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
-        //                     | InvalidAlgorithmParameterException | IOException e) {
-        //                 e.printStackTrace();
-        //             }
-        //         }
-        //     }
+        // @Override
+        // public void run() {
+        // try {
+        // _secureSocket_cmd = _serverSocket_cmd.accept(_vaildClients);
+        // _serverSocket_cmd = new SecureServerSocket(_publicKey, _privateKey,
+        // _port_cmd);
+        // log("Connected with Client: CMD");
+        // } catch (InvalidKeyException | NoSuchAlgorithmException |
+        // NoSuchPaddingException
+        // | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException |
+        // SignatureException
+        // | IOException e) {
+        // e.printStackTrace();
+        // }
+        // while (true) {
+        // try {
+        // byte[] signal = _secureSocket_cmd.recvall();
+        // } catch (InvalidKeyException | IllegalBlockSizeException |
+        // BadPaddingException
+        // | InvalidAlgorithmParameterException | IOException e) {
+        // e.printStackTrace();
+        // }
+        // }
+        // }
         // }).start();
 
     }

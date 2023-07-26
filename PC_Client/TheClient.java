@@ -115,11 +115,14 @@ public class TheClient extends UIFrame {
             public void run() {
                 while (true) {
                     try {
+                        Thread.sleep(20);
+                        if(socket.isClosed())break;
                         byte[] data = socket.recvall();
                         _vsr.setImageFromBytes(data);
 
                     } catch (Exception e) {
                         e.printStackTrace();
+                        break;
                     }
                 }
             }
