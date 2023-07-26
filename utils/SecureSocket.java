@@ -231,4 +231,21 @@ public class SecureSocket {
         _socket.close();
     }
 
+    /**
+     * Returns the connection state of the socket.
+     * 
+     * @return
+     */
+    public boolean isConnected() {
+        return _socket.isConnected();
+    }
+
+    /**
+     * Returns the closed state of the socket.
+     * 
+     * @return
+     */
+    public boolean isClosed() {
+        return _socket.isClosed();
+    }
 }
