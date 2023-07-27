@@ -3,13 +3,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 
-
-
 /**
  * LocalCMD, use to bulid a cmd process.
  * 
  * @author a-lives
- * @className TheServer
+ * @className LocalCMD
  * @version 1.0
  * @date 2023-7-25
  */
@@ -39,7 +37,7 @@ public class LocalCMD {
      * @throws IOException
      */
     public void Input(String command) throws IOException {
-        _outputStream.write((command+"\n").getBytes());
+        _outputStream.write((command + "\n").getBytes());
         _outputStream.flush();
     }
 

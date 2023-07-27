@@ -38,7 +38,8 @@ public class VideoPlayer extends JPanel {
         _socket = new SecureSocket(privateKey, serverIP, serverPort);
         _mouseQueue = new ArrayDeque<>();
         addMouseTracker();
-        addMouseEventSender();;
+        addMouseEventSender();
+        ;
     }
 
     /**

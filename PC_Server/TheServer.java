@@ -9,7 +9,6 @@ import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 
 import java.util.Properties;
-import java.util.Date;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -63,16 +62,6 @@ public class TheServer {
     private static Rectangle _screenRect;
 
     /**
-     * make log
-     * 
-     * @param msg
-     */
-    public static void log(String msg) {
-        Date date = new Date();
-        System.out.println("[" + date.toString() + "] " + msg);
-    }
-
-    /**
      * load settings
      * 
      * @param path
@@ -107,7 +96,7 @@ public class TheServer {
         _screenWidth = d.getWidth();
         _robot = new Robot();
 
-        log("Loaded settings");
+        Log.log("Loaded settings");
     }
 
     /**
@@ -201,14 +190,14 @@ public class TheServer {
                 while (true) {
                     try {
                         _secureSocket_video = _serverSocket_video.accept(_vaildClients);
-                        log("Connected with Client: video");
+                        Log.log("Connected with Client: video");
                     } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
                             | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException
                             | SignatureException
                             | IOException e) {
                         e.printStackTrace();
                     }
-                    log("Begined to send screenshot");
+                    Log.log("Begined to send screenshot");
                     while (true) {
                         try {
                             if (_secureSocket_video.isClosed())
@@ -218,7 +207,7 @@ public class TheServer {
                         } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
                                 | InvalidAlgorithmParameterException | IOException | InterruptedException e) {
                             e.printStackTrace();
-                            log("Connection close: video");
+                            Log.log("Connection close: video");
                             break;
                         }
                     }
@@ -230,7 +219,7 @@ public class TheServer {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                 try {
+                try {
                     _serverSocket_mouse = new SecureServerSocket(_publicKey, _privateKey, _port_mouse);
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
@@ -239,7 +228,7 @@ public class TheServer {
                 while (true) {
                     try {
                         _secureSocket_mouse = _serverSocket_mouse.accept(_vaildClients);
-                        log("Connected with Client: Mouse");
+                        Log.log("Connected with Client: Mouse");
                     } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
                             | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException
                             | SignatureException
@@ -255,7 +244,7 @@ public class TheServer {
                         } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
                                 | InvalidAlgorithmParameterException | IOException e) {
                             e.printStackTrace();
-                            log("Connection close: mouse");
+                            Log.log("Connection close: mouse");
                             break;
                         }
                     }
