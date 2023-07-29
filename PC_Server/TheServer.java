@@ -32,10 +32,10 @@ import javax.crypto.NoSuchPaddingException;
  * The server can receive files/commands from the client, access local files,
  * terminals, and pass the local screen to the client.
  * 
- * @author a-lives
+ * @author a-lives, Yin
  * @className TheServer
- * @version 1.0
- * @date 2023-7-22
+ * @version 1.1
+ * @date 2023-7-29
  */
 
 public class TheServer {
@@ -213,25 +213,27 @@ public class TheServer {
                     try {
                         _secureSocket_video = _serverSocket_video.accept(_vaildClients);
                         Log.log("Connected with Client: video");
+                        new Thread(() -> {
+                            Log.log("Begined to send screenshot");
+                            while (true) {
+                                try {
+                                    if (_secureSocket_video.isClosed())
+                                        break;
+                                    _secureSocket_video.sendall(getScreen(0.8));
+                                    Thread.sleep(20);
+                                } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+                                        | InvalidAlgorithmParameterException | IOException | InterruptedException e) {
+                                    e.printStackTrace();
+                                    Log.log("Connection close: video");
+                                    break;
+                                }
+                            }
+                        }).start();;
                     } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
                             | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException
                             | SignatureException
                             | IOException e) {
                         e.printStackTrace();
-                    }
-                    Log.log("Begined to send screenshot");
-                    while (true) {
-                        try {
-                            if (_secureSocket_video.isClosed())
-                                break;
-                            _secureSocket_video.sendall(getScreen(0.8));
-                            Thread.sleep(20);
-                        } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
-                                | InvalidAlgorithmParameterException | IOException | InterruptedException e) {
-                            e.printStackTrace();
-                            Log.log("Connection close: video");
-                            break;
-                        }
                     }
                 }
             }
@@ -257,24 +259,26 @@ public class TheServer {
                     try {
                         _secureSocket_mouse = _serverSocket_mouse.accept(_vaildClients);
                         Log.log("Connected with Client: Mouse");
+                        new Thread(() -> {
+                            while (true) {
+                                try {
+                                    if (_secureSocket_mouse.isClosed())
+                                        break;
+                                    byte[] signal = _secureSocket_mouse.recvall();
+                                    mouseDo(signal);
+                                } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+                                        | InvalidAlgorithmParameterException | IOException e) {
+                                    e.printStackTrace();
+                                    Log.log("Connection close: mouse");
+                                    break;
+                                }
+                            }
+                        }).start();;
                     } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
                             | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException
                             | SignatureException
                             | IOException e) {
                         e.printStackTrace();
-                    }
-                    while (true) {
-                        try {
-                            if (_secureSocket_mouse.isClosed())
-                                break;
-                            byte[] signal = _secureSocket_mouse.recvall();
-                            mouseDo(signal);
-                        } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
-                                | InvalidAlgorithmParameterException | IOException e) {
-                            e.printStackTrace();
-                            Log.log("Connection close: mouse");
-                            break;
-                        }
                     }
                 }
             }

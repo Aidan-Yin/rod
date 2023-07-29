@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Rod</string>
+    <string name="start">start</string>
+    <string name="host">host</string>
+    <string name="port1">Video port</string>
+    <string name="port2">Mouse port</string>
+    <string name="settings">Settings</string>
+</resources>
