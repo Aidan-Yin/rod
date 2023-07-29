@@ -29,13 +29,14 @@ public class TheClient extends UIFrame {
 
     private RemoteCMD _rcmd;
     private VideoPlayer _vsr;
-    private DropPanel _dropPanel;
+    // private DropPanel _dropPanel;
 
     private PrivateKey _privateKey;
     private String _serverIP;
     private int _serverPort_video;
     private int _serverPort_mouse;
-    private int _serverPort_cmd;
+    private int _serverPort_cmd_input;
+    private int _serverPort_cmd_output;
 
     /**
      * Initialization
@@ -47,7 +48,7 @@ public class TheClient extends UIFrame {
 
         loadSettingFromProp("");
 
-        _rcmd = new RemoteCMD();
+        _rcmd = new RemoteCMD(_privateKey, _serverIP, _serverPort_cmd_input, _serverPort_cmd_output);
         _vsr = new VideoPlayer(_privateKey, _serverIP, _serverPort_mouse);
         // _dropPanel = new DropPanel("Rod-Client");
 
@@ -105,7 +106,8 @@ public class TheClient extends UIFrame {
         _serverIP = prop.getProperty("serverIP", "127.0.0.1");
         _serverPort_video = Integer.parseInt(prop.getProperty("serverPort_video", "8080"));
         _serverPort_mouse = Integer.parseInt(prop.getProperty("serverPort_mouse", "8081"));
-        _serverPort_cmd = Integer.parseInt(prop.getProperty("serverPort_cmd", "8082"));
+        _serverPort_cmd_input = Integer.parseInt(prop.getProperty("serverPort_cmd", "8082"));
+        _serverPort_cmd_output = Integer.parseInt(prop.getProperty("serverPort_cmd", "8083"));
         Log.log("loaded settings");
     }
 
@@ -126,7 +128,7 @@ public class TheClient extends UIFrame {
             InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException,
             NoSuchPaddingException, SignatureException {
         SecureSocket socket = new SecureSocket(_privateKey, _serverIP, _serverPort_video);
-        Log.log("connected");
+        Log.log("connected: video");
         new Thread(new Runnable() {
             @Override
             public void run() {

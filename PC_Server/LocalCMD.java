@@ -2,14 +2,27 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Queue;
+import java.util.ArrayDeque;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 /**
  * LocalCMD, use to bulid a cmd process.
  * 
  * @author a-lives
  * @className LocalCMD
- * @version 1.0
- * @date 2023-7-25
+ * @version 1.1
+ * @date 2023-7-29
  */
 public class LocalCMD {
 
@@ -18,70 +31,171 @@ public class LocalCMD {
     public BufferedReader _inputStreamReader;
     public BufferedReader _errorStreamReader;
 
+    private PrivateKey _privateKey;
+    private PublicKey _publicKey;
+    private String[] _vaildClients;
+
+    private SecureServerSocket _serverSocket_input;
+    private SecureSocket _secureSocket_input;
+    private int _port_input;
+
+    private SecureServerSocket _serverSocket_output;
+    private SecureSocket _secureSocket_output;
+    private int _port_output;
+
+    private Queue<String> _msg_cache;
+
     /**
      * 
+     * @param privateKey
+     * @param port_input
+     * @param port_output
      * @throws IOException
+     * @throws InvalidKeyException
+     * @throws NoSuchAlgorithmException
+     * @throws NoSuchPaddingException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     * @throws SignatureException
+     * @throws InvalidKeySpecException
      */
-    public LocalCMD() throws IOException {
+    public LocalCMD(PrivateKey privateKey, PublicKey publicKey, String[] vaildClients, int port_input, int port_output)
+            throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            IllegalBlockSizeException, BadPaddingException, SignatureException, InvalidKeySpecException {
+        _privateKey = privateKey;
+        _publicKey = publicKey;
+        _vaildClients = vaildClients;
+        _port_input = port_input;
+        _port_output = port_output;
         ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe");
         _process = processBuilder.start();
+        Log.log("Built cmd process.");
         _outputStream = _process.getOutputStream();
         _inputStreamReader = new BufferedReader(new InputStreamReader(_process.getInputStream()));
         _errorStreamReader = new BufferedReader(new InputStreamReader(_process.getErrorStream()));
+        _msg_cache = new ArrayDeque<>();
     }
 
     /**
-     * input command
-     * 
-     * @param command
-     * @throws IOException
-     */
-    public void Input(String command) throws IOException {
-        _outputStream.write((command + "\n").getBytes());
-        _outputStream.flush();
-    }
-
-    /**
-     * get output
      * 
      * @throws IOException
      */
-    public void Output() throws IOException {
+    public void addInputSocket() throws IOException {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String line;
                 try {
-                    while ((line = _inputStreamReader.readLine()) != null) {
-                        System.out.println(line);
-                    }
+                    _serverSocket_input = new SecureServerSocket(_publicKey, _privateKey, _port_input);
+                    Log.log("Built socket,waitting connection...: cmd-input");
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
+                }
+                while (true) {
+                    try {
+                        _secureSocket_input = _serverSocket_input.accept(_vaildClients);
+                        Log.log("Connected with Client: cmd-input");
+                        new Thread(() -> {
+                            while (true) {
+                                try {
+                                    if (_secureSocket_input.isClosed())
+                                        break;
+                                    byte[] signal = _secureSocket_input.recvall();
+                                    _outputStream.write((new String(signal) + "\n").getBytes());
+                                    _outputStream.flush();
+                                    Log.log("Received command: " + new String(signal));
+                                } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+                                        | InvalidAlgorithmParameterException | IOException e) {
+                                    e.printStackTrace();
+                                    Log.log("Connection close: cmd-input");
+                                    break;
+                                }
+                            }
+                        }).start();
+                    } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
+                            | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException
+                            | SignatureException
+                            | IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
+    }
+
+    public void addOutputSocket() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    _serverSocket_output = new SecureServerSocket(_publicKey, _privateKey, _port_output);
+                    Log.log("Built socket,waitting connection...: cmd-output");
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                while (true) {
+                    try {
+                        _secureSocket_output = _serverSocket_output.accept(_vaildClients);
+                        Log.log("Connected with Client: cmd-output");
+                        new Thread(() -> {
+                            while (true) {
+                                try {
+                                    if (_secureSocket_output.isClosed())
+                                        break;
+                                    if (!_msg_cache.isEmpty()) {
+                                        _secureSocket_output.sendall(_msg_cache.poll().getBytes());
+                                        Log.log("sended msg");
+                                        Thread.sleep(20);
+                                    }
+                                } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+                                        | InvalidAlgorithmParameterException | IOException | InterruptedException e) {
+                                    e.printStackTrace();
+                                    Log.log("Connection close: cmd-output");
+                                    break;
+                                }
+                            }
+                        }).start();
+                        ;
+                    } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
+                            | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException
+                            | SignatureException
+                            | IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }).start();
     }
 
     /**
-     * get Error
-     * 
-     * @throws IOException
+     * get msg from cmd process and store in a msg cache
      */
-    public void getError() throws IOException {
+    public void addMsgGeter() {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String line;
-                try {
-                    while ((line = _errorStreamReader.readLine()) != null) {
-                        System.out.println(line);
+                String line_msg;
+                // String line_error;
+                for (;;) {
+                    try {
+                        Thread.sleep(20);
+                        if ((line_msg = _inputStreamReader.readLine()) != null) {
+                            System.out.println("msg: " + line_msg);
+                            _msg_cache.offer(line_msg);
+                        }
+                        // 不知道为什么这个会一直阻塞，所以停用, 另开线程的话_msg_cache会有线程安全问题,
+                        // if ((line_error = _errorStreamReader.readLine()) != null) {
+                        // System.out.println("Error: " + line_error);
+                        // _msg_cache.offer(line_error);
+                        // }
+                    } catch (IOException | InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
                     }
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
                 }
             }
+
         }).start();
     }
 
