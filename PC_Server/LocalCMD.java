@@ -145,7 +145,7 @@ public class LocalCMD {
                                         break;
                                     if (!_msg_cache.isEmpty()) {
                                         _secureSocket_output.sendall(_msg_cache.poll().getBytes());
-                                        Log.log("sended msg");
+                                        // Log.log("sended msg");
                                         Thread.sleep(20);
                                     }
                                 } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
