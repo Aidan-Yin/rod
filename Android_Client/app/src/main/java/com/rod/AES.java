@@ -22,9 +22,9 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class AES {
 
-    private static Cipher _cipher;
-    private static String _mode;
-    private static byte[] _key;
+    private Cipher _cipher;
+    private String _mode;
+    private byte[] _key;
 
     /**
      * Initialization
