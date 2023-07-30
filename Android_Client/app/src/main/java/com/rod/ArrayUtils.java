@@ -2,11 +2,28 @@ package com.rod;
 
 import java.nio.ByteBuffer;
 
+/**
+ * Some utils for array.
+ * 
+ * @author Yin
+ * @className ArrayUtils
+ * @date 2023-7-29
+ */
 public class ArrayUtils {
-    public static byte[] arrayConcat(byte[] a, byte[] b) {
-        byte[] result = new byte[a.length + b.length];
-        System.arraycopy(a, 0, result, 0, a.length);
-        System.arraycopy(b, 0, result, a.length, b.length);
+    public static byte[] arrayConcat(byte[]... bytes) {
+        if (bytes.length<2){
+            throw new IllegalArgumentException("arrayConcat needs at least 2 arrays");
+        }
+        int allLength = 0;
+        for (byte[] a : bytes){
+            allLength += a.length;
+        }
+        byte[] result = new byte[allLength];
+        int offset = 0;
+        for (byte[] a : bytes){
+            System.arraycopy(a, 0, result, offset, a.length);
+            offset += a.length;
+        }
         return result;
     }
 

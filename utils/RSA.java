@@ -24,7 +24,7 @@ import javax.crypto.NoSuchPaddingException;
  * 
  * @author Yin
  * @className RSA
- * @date 2023-7-25
+ * @date 2023-7-30
  */
 public class RSA {
     public PublicKey publicKey;
@@ -35,12 +35,16 @@ public class RSA {
      * @param nbit the keysize
      * @throws NoSuchAlgorithmException
      */
-    public RSA(int nbit) throws NoSuchAlgorithmException {
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-        keyPairGenerator.initialize(nbit);
-        KeyPair keyPair = keyPairGenerator.generateKeyPair();
-        publicKey = keyPair.getPublic();
-        privateKey = keyPair.getPrivate();
+    public RSA(int nbit) {
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(nbit);
+            KeyPair keyPair = keyPairGenerator.generateKeyPair();
+            publicKey = keyPair.getPublic();
+            privateKey = keyPair.getPrivate();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
     }
 
     public byte[] getBytePublicKey() {
@@ -158,12 +162,16 @@ public class RSA {
      * 
      * @param byteKey You can get it from PublicKey.getEncoded()
      * @return
-     * @throws NoSuchAlgorithmException
      * @throws InvalidKeySpecException
      */
     public static PublicKey getPublicKeyFromByte(byte[] byteKey)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            throws InvalidKeySpecException {
+        KeyFactory keyFactory = null;
+        try {
+            keyFactory = KeyFactory.getInstance("RSA");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
         X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(byteKey);
         PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
         return publicKey;
@@ -173,25 +181,41 @@ public class RSA {
      * 
      * @param byteKey You can get it from PrivateKey.getEncoded()
      * @return
-     * @throws NoSuchAlgorithmException
      * @throws InvalidKeySpecException
      */
     public static PrivateKey getPrivateKeyFromByte(byte[] byteKey)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            throws InvalidKeySpecException {
+        KeyFactory keyFactory = null;
+        try {
+            keyFactory = KeyFactory.getInstance("RSA");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
         PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(byteKey);
         PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
         return privateKey;
     }
 
+    /**
+     * 
+     * @param base64Key
+     * @return
+     * @throws InvalidKeySpecException
+     */
     public static PublicKey getPublicKeyFromBase64(String base64Key)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
+            throws InvalidKeySpecException {
         byte[] byteKey = Base64.getDecoder().decode(base64Key);
         return RSA.getPublicKeyFromByte(byteKey);
     }
 
+    /**
+     * 
+     * @param base64Key
+     * @return
+     * @throws InvalidKeySpecException
+     */
     public static PrivateKey getPrivateKeyFromBase64(String base64Key)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
+            throws InvalidKeySpecException {
         byte[] byteKey = Base64.getDecoder().decode(base64Key);
         return RSA.getPrivateKeyFromByte(byteKey);
     }
@@ -204,11 +228,10 @@ public class RSA {
      *               NJzTM3eX+kBSVnD6uKUa7S5/MueQcf1f3km5tohapcNhpErlG2XE/0ECAwEAAQ==<br>
      *               -----END RSA PUBLIC KEY-----
      * @return PublicKey
-     * @throws NoSuchAlgorithmException
      * @throws InvalidKeySpecException
      */
     public static PublicKey getPublicKeyFromFormal(String formal)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
+            throws InvalidKeySpecException {
         String[] buffer = formal.split("\n");
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 1; i < (buffer.length - 1); i++) {
@@ -231,11 +254,10 @@ public class RSA {
      *               YRYeuc9LPXs=<br>
      *               -----END RSA PRIVATE KEY-----
      * @return PrivateKey
-     * @throws NoSuchAlgorithmException
      * @throws InvalidKeySpecException
      */
     public static PrivateKey getPrivateKeyFromFormal(String formal)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
+            throws InvalidKeySpecException {
         String[] buffer = formal.split("\n");
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 1; i < (buffer.length - 1); i++) {
@@ -249,18 +271,19 @@ public class RSA {
      * @param data      plaintext
      * @param publicKey
      * @return ciphertext
-     * @throws NoSuchAlgorithmException
-     * @throws NoSuchPaddingException
      * @throws InvalidKeyException
-     * @throws IllegalBlockSizeException
-     * @throws BadPaddingException
      */
-    public static byte[] encrypt(byte[] data, PublicKey publicKey) throws NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-        byte[] result = cipher.doFinal(data);
-        return result;
+    public static byte[] encrypt(byte[] data, PublicKey publicKey) throws InvalidKeyException {
+        try {
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            byte[] result = cipher.doFinal(data);
+            return result;
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
+                | BadPaddingException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**
@@ -268,18 +291,20 @@ public class RSA {
      * @param data       ciphertext
      * @param privateKey
      * @return plaintext
-     * @throws NoSuchAlgorithmException
-     * @throws NoSuchPaddingException
-     * @throws InvalidKeyException
      * @throws IllegalBlockSizeException
      * @throws BadPaddingException
      */
-    public static byte[] decrypt(byte[] data, PrivateKey privateKey) throws NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-        cipher.init(Cipher.DECRYPT_MODE, privateKey);
-        byte[] result = cipher.doFinal(data);
-        return result;
+    public static byte[] decrypt(byte[] data, PrivateKey privateKey)
+            throws IllegalBlockSizeException, BadPaddingException {
+        try {
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            byte[] result = cipher.doFinal(data);
+            return result;
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**
@@ -287,16 +312,19 @@ public class RSA {
      * @param data       data to sign
      * @param privateKey
      * @return signature
-     * @throws NoSuchAlgorithmException
-     * @throws InvalidKeyException
      * @throws SignatureException
+     * @throws InvalidKeyException
      */
-    public static byte[] sign(byte[] data, PrivateKey privateKey)
-            throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        Signature signature = Signature.getInstance("SHA256withRSA");
-        signature.initSign(privateKey);
-        signature.update(data);
-        return signature.sign();
+    public static byte[] sign(byte[] data, PrivateKey privateKey) throws SignatureException, InvalidKeyException {
+        try {
+            Signature signature = Signature.getInstance("SHA256withRSA");
+            signature.initSign(privateKey);
+            signature.update(data);
+            return signature.sign();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**
@@ -305,15 +333,19 @@ public class RSA {
      * @param signature signature
      * @param publicKey
      * @return is the signature valid or not
-     * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
      * @throws SignatureException
      */
     public static boolean verify(byte[] data, byte[] signature, PublicKey publicKey)
-            throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        Signature _signature = Signature.getInstance("SHA256withRSA");
-        _signature.initVerify(publicKey);
-        _signature.update(data);
-        return _signature.verify(signature);
+            throws SignatureException, InvalidKeyException {
+        try {
+            Signature _signature = Signature.getInstance("SHA256withRSA");
+            _signature.initVerify(publicKey);
+            _signature.update(data);
+            return _signature.verify(signature);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

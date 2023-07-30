@@ -17,8 +17,8 @@ import javax.crypto.spec.SecretKeySpec;
  * 
  * @author Yin
  * @className AES
- * @version 1.1
- * @date 2023-7-17
+ * @version 1.2
+ * @date 2023-7-30
  */
 public class AES {
 
@@ -31,25 +31,27 @@ public class AES {
      * 
      * @param mode the AES mode you are going to use
      * @param key  the secret key you are going to use
-     * @throws NoSuchAlgorithmException
-     * @throws NoSuchPaddingException
      */
-    public AES(String mode, byte[] key) throws NoSuchAlgorithmException, NoSuchPaddingException {
-        switch (mode) {
-            case "ECB":
-                _cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-                break;
-            case "CBC":
-                _cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-                break;
-            case "OFB":
-                _cipher = Cipher.getInstance("AES/OFB/NoPadding");
-                break;
-            case "GCM":
-                _cipher = Cipher.getInstance("AES/GCM/NoPadding");
-                break;
-            default:
-                throw new IllegalArgumentException("not a valid AES mode parameter");
+    public AES(String mode, byte[] key) {
+        try{
+            switch (mode) {
+                case "ECB":
+                    _cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+                    break;
+                case "CBC":
+                    _cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                    break;
+                case "OFB":
+                    _cipher = Cipher.getInstance("AES/OFB/NoPadding");
+                    break;
+                case "GCM":
+                    _cipher = Cipher.getInstance("AES/GCM/NoPadding");
+                    break;
+                default:
+                    throw new IllegalArgumentException("not a valid AES mode parameter");
+            }
+        }catch(NoSuchAlgorithmException | NoSuchPaddingException e){
+            e.printStackTrace();
         }
         _mode = mode;
         _key = key;
@@ -64,7 +66,7 @@ public class AES {
      * @throws BadPaddingException
      * @throws InvalidKeyException
      */
-    public byte[] encrypt(byte[] data) throws IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+    public byte[] encrypt(byte[] data) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
         // verify parameter
         if (_mode.equals("GCM")) {
             throw new IllegalArgumentException("Miss iv and aad for GCM mode");
@@ -199,5 +201,13 @@ public class AES {
         _cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(_key, "AES"), new GCMParameterSpec(128, iv));
         _cipher.updateAAD(aad);
         return _cipher.doFinal(data);
+    }
+
+    /**
+     * 
+     * @return the AES mode the object is using
+     */
+    public String getMode() {
+        return _mode;
     }
 }
