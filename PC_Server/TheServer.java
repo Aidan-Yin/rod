@@ -54,13 +54,9 @@ public class TheServer {
     private static SecureSocket _secureSocket_mouse;
     private static int _port_mouse;
 
-    private static SecureServerSocket _serverSocket_cmd_input;
-    private static SecureSocket _secureSocket_cmd_input;
     private static int _port_cmd_input;
-
-    private static SecureServerSocket _serverSocket_cmd_output;
-    private static SecureSocket _secureSocket_cmd_output;
     private static int _port_cmd_output;
+    private static LocalCMD _cmd_process;
 
     private static double _screenHeight;
     private static double _screenWidth;
@@ -228,7 +224,7 @@ public class TheServer {
                                     break;
                                 }
                             }
-                        }).start();;
+                        }).start();
                     } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
                             | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException
                             | SignatureException
@@ -273,7 +269,7 @@ public class TheServer {
                                     break;
                                 }
                             }
-                        }).start();;
+                        }).start();
                     } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
                             | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException
                             | SignatureException
@@ -287,32 +283,23 @@ public class TheServer {
 
     /**
      * add cmd socket
+     * 
+     * @throws IOException
+     * @throws InvalidKeySpecException
+     * @throws SignatureException
+     * @throws BadPaddingException
+     * @throws IllegalBlockSizeException
+     * @throws NoSuchPaddingException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
      */
-    public static void addCMDSocket() {
+    public static void addCMDSocket() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+            IllegalBlockSizeException, BadPaddingException, SignatureException, InvalidKeySpecException, IOException {
         // CMD Socket
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    _secureSocket_cmd_input = _serverSocket_cmd_input.accept(_vaildClients);
-                    _serverSocket_cmd_input = new SecureServerSocket(_publicKey, _privateKey,
-                            _port_cmd_input);
-                    Log.log("Connected with Client: CMD");
-                } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
-                        | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException | SignatureException
-                        | IOException e) {
-                    e.printStackTrace();
-                }
-                while (true) {
-                    try {
-                        byte[] signal = _secureSocket_cmd_input.recvall();
-                    } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
-                            | InvalidAlgorithmParameterException | IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
+        _cmd_process = new LocalCMD(_privateKey, _publicKey, _vaildClients, _port_cmd_input, _port_cmd_output);
+        _cmd_process.addInputSocket();
+        _cmd_process.addMsgGeter();
+        _cmd_process.addOutputSocket();
     }
 
     public static void main(String[] args) throws UnknownHostException, IOException, NoSuchAlgorithmException,
@@ -321,10 +308,10 @@ public class TheServer {
         loadSettingFromProp("");
         if (args.length == 0) {
             // System.out.println(_help_doc);
-            //  debug:
+            // debug:
             addVideoSocket();
             addMouseSocket();
-            // addCMDSocket();
+            addCMDSocket();
         } else {
             switch (args[0]) {
                 case "help" -> {
