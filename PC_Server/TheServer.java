@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -207,7 +206,7 @@ public class TheServer {
                 }
                 while (true) {
                     try {
-                        _secureSocket_video = _serverSocket_video.accept(_vaildClients);
+                        _secureSocket_video = _serverSocket_video.accept(_vaildClients,new String[]{"GCM","OFB"});
                         Log.log("Connected with Client: video");
                         new Thread(() -> {
                             Log.log("Begined to send screenshot");
@@ -217,16 +216,14 @@ public class TheServer {
                                         break;
                                     _secureSocket_video.sendall(getScreen(0.8));
                                     Thread.sleep(20);
-                                } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
-                                        | InvalidAlgorithmParameterException | IOException | InterruptedException e) {
+                                } catch (IllegalBlockSizeException | IOException | InterruptedException e) {
                                     e.printStackTrace();
                                     Log.log("Connection close: video");
                                     break;
                                 }
                             }
                         }).start();
-                    } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
-                            | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException
+                    } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException
                             | SignatureException
                             | IOException e) {
                         e.printStackTrace();
@@ -262,16 +259,14 @@ public class TheServer {
                                         break;
                                     byte[] signal = _secureSocket_mouse.recvall();
                                     mouseDo(signal);
-                                } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
-                                        | InvalidAlgorithmParameterException | IOException e) {
+                                } catch (IllegalBlockSizeException | IOException e) {
                                     e.printStackTrace();
                                     Log.log("Connection close: mouse");
                                     break;
                                 }
                             }
                         }).start();
-                    } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
-                            | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException
+                    } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException
                             | SignatureException
                             | IOException e) {
                         e.printStackTrace();
@@ -299,6 +294,7 @@ public class TheServer {
         _cmd_process = new LocalCMD(_privateKey, _publicKey, _vaildClients, _port_cmd_input, _port_cmd_output);
         _cmd_process.addInputSocket();
         _cmd_process.addMsgGeter();
+        _cmd_process.addErrGeter();
         _cmd_process.addOutputSocket();
     }
 

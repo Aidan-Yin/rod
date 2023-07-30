@@ -2,15 +2,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.security.InvalidAlgorithmParameterException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Queue;
-import java.util.ArrayDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -43,7 +42,7 @@ public class LocalCMD {
     private SecureSocket _secureSocket_output;
     private int _port_output;
 
-    private Queue<String> _msg_cache;
+    private ConcurrentLinkedQueue<String> _output_cache;
 
     /**
      * 
@@ -71,9 +70,9 @@ public class LocalCMD {
         _process = processBuilder.start();
         Log.log("Built cmd process.");
         _outputStream = _process.getOutputStream();
-        _inputStreamReader = new BufferedReader(new InputStreamReader(_process.getInputStream()));
-        _errorStreamReader = new BufferedReader(new InputStreamReader(_process.getErrorStream()));
-        _msg_cache = new ArrayDeque<>();
+        _inputStreamReader = new BufferedReader(new InputStreamReader(_process.getInputStream(), "GBK"));
+        _errorStreamReader = new BufferedReader(new InputStreamReader(_process.getErrorStream(), "GBK"));
+        _output_cache = new ConcurrentLinkedQueue<>();
     }
 
     /**
@@ -104,16 +103,15 @@ public class LocalCMD {
                                     _outputStream.write((new String(signal) + "\n").getBytes());
                                     _outputStream.flush();
                                     Log.log("Received command: " + new String(signal));
-                                } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
-                                        | InvalidAlgorithmParameterException | IOException e) {
+                                } catch (IllegalBlockSizeException | IOException e) {
                                     e.printStackTrace();
                                     Log.log("Connection close: cmd-input");
                                     break;
                                 }
                             }
                         }).start();
-                    } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
-                            | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException
+                    } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+                            | InvalidKeySpecException
                             | SignatureException
                             | IOException e) {
                         e.printStackTrace();
@@ -143,13 +141,12 @@ public class LocalCMD {
                                 try {
                                     if (_secureSocket_output.isClosed())
                                         break;
-                                    if (!_msg_cache.isEmpty()) {
-                                        _secureSocket_output.sendall(_msg_cache.poll().getBytes());
+                                    if (!_output_cache.isEmpty()) {
+                                        _secureSocket_output.sendall(_output_cache.poll().getBytes());
                                         // Log.log("sended msg");
                                         Thread.sleep(20);
                                     }
-                                } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
-                                        | InvalidAlgorithmParameterException | IOException | InterruptedException e) {
+                                } catch (IllegalBlockSizeException | IOException | InterruptedException e) {
                                     e.printStackTrace();
                                     Log.log("Connection close: cmd-output");
                                     break;
@@ -157,8 +154,8 @@ public class LocalCMD {
                             }
                         }).start();
                         ;
-                    } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
-                            | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException
+                    } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+                            | InvalidKeySpecException
                             | SignatureException
                             | IOException e) {
                         e.printStackTrace();
@@ -169,7 +166,7 @@ public class LocalCMD {
     }
 
     /**
-     * get msg from cmd process and store in a msg cache
+     * get msg from cmd process and store in a output cache
      */
     public void addMsgGeter() {
         new Thread(new Runnable() {
@@ -182,20 +179,39 @@ public class LocalCMD {
                         Thread.sleep(20);
                         if ((line_msg = _inputStreamReader.readLine()) != null) {
                             System.out.println("msg: " + line_msg);
-                            _msg_cache.offer(line_msg);
+                            _output_cache.offer(line_msg);
                         }
-                        // 不知道为什么这个会一直阻塞，所以停用, 另开线程的话_msg_cache会有线程安全问题,
-                        // if ((line_error = _errorStreamReader.readLine()) != null) {
-                        // System.out.println("Error: " + line_error);
-                        // _msg_cache.offer(line_error);
-                        // }
                     } catch (IOException | InterruptedException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                 }
             }
+        }).start();
+    }
 
+    /**
+     * get error from cmd process and store in a msg cache
+     */
+    public void addErrGeter() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String line_msg;
+                // String line_error;
+                for (;;) {
+                    try {
+                        Thread.sleep(20);
+                        if ((line_msg = _errorStreamReader.readLine()) != null) {
+                            System.out.println("err: " + line_msg);
+                            _output_cache.offer(line_msg);
+                        }
+                    } catch (IOException | InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+            }
         }).start();
     }
 

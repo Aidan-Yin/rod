@@ -127,7 +127,7 @@ public class TheClient extends UIFrame {
     public void play() throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
             InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException,
             NoSuchPaddingException, SignatureException {
-        SecureSocket socket = new SecureSocket(_privateKey, _serverIP, _serverPort_video);
+        SecureSocket socket = new SecureSocket(_privateKey, _serverIP, _serverPort_video, "OFB");
         Log.log("connected: video");
         new Thread(new Runnable() {
             @Override

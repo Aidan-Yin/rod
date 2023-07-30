@@ -10,8 +10,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.PrivateKey;
-import java.util.Queue;
-import java.util.ArrayDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * A control that is responsible for playing the server screen.
@@ -26,7 +25,7 @@ public class VideoPlayer extends JPanel {
 
     private BufferedImage image;
     private SecureSocket _socket;
-    private Queue<String> _mouseQueue;
+    private ConcurrentLinkedQueue<String> _mouseQueue;
 
     /**
      * Initialization
@@ -37,7 +36,7 @@ public class VideoPlayer extends JPanel {
         setBackground(Color.BLACK);
         _socket = new SecureSocket(privateKey, serverIP, serverPort);
         Log.log("connected: mouse");
-        _mouseQueue = new ArrayDeque<>();
+        _mouseQueue = new ConcurrentLinkedQueue<>();
         addMouseTracker();
         addMouseEventSender();
         ;
@@ -81,6 +80,7 @@ public class VideoPlayer extends JPanel {
                 _mouseQueue.offer(signal);
             }
         });
+
         addMouseMotionListener(new MouseMotionListener() {
             @Override
             public void mouseDragged(MouseEvent e) {
@@ -101,7 +101,6 @@ public class VideoPlayer extends JPanel {
 
             @Override
             public void mouseMoved(MouseEvent e) {
-
             }
         });
     }
@@ -113,22 +112,17 @@ public class VideoPlayer extends JPanel {
                 while (true) {
                     try {
                         Thread.sleep(20);
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                    if (!_mouseQueue.isEmpty()) {
-                        try {
+                        if (!_mouseQueue.isEmpty()) {
                             String signal = _mouseQueue.poll();
                             _socket.sendall(signal.getBytes());
-                        } catch (Exception e) {
-                            e.printStackTrace();
                         }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }
-
         }).start();
+
     }
 
     /**
