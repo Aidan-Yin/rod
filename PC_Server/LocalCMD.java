@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -92,7 +91,7 @@ public class LocalCMD {
                 }
                 while (true) {
                     try {
-                        _secureSocket_input = _serverSocket_input.accept(_vaildClients);
+                        _secureSocket_input = _serverSocket_input.accept(_vaildClients, new String[] { "GCM" });
                         Log.log("Connected with Client: cmd-input");
                         new Thread(() -> {
                             while (true) {
@@ -134,7 +133,7 @@ public class LocalCMD {
                 }
                 while (true) {
                     try {
-                        _secureSocket_output = _serverSocket_output.accept(_vaildClients);
+                        _secureSocket_output = _serverSocket_output.accept(_vaildClients, new String[] { "GCM" });
                         Log.log("Connected with Client: cmd-output");
                         new Thread(() -> {
                             while (true) {

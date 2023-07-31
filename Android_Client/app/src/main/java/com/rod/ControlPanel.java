@@ -72,7 +72,7 @@ public class ControlPanel extends AppCompatActivity {
                 byte[] img;
                 Bitmap[] bitmap = new Bitmap[1];
                 try {
-                    socket[0] = new SecureSocket(privateKey[0], host, port1);
+                    socket[0] = new SecureSocket(privateKey[0], host, port1, "OFB");
                     img = socket[0].recvall();
                     bitmap[0] = BitmapFactory.decodeByteArray(img, 0, img.length);
                     handler.post(() -> {
@@ -101,7 +101,7 @@ public class ControlPanel extends AppCompatActivity {
         Thread threadMouse = new Thread(() -> {
             while (true) {
                 try {
-                    socket[1] = new SecureSocket(privateKey[0], host, port2);
+                    socket[1] = new SecureSocket(privateKey[0], host, port2, "GCM");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

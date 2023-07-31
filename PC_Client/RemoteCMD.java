@@ -81,9 +81,9 @@ public class RemoteCMD extends JPanel {
         add(_inputField, constraints);
 
         // bulid sockets
-        _sendSocket = new SecureSocket(privateKey, serverIP, sendPort);
+        _sendSocket = new SecureSocket(privateKey, serverIP, sendPort, "GCM");
         Log.log("connected: cmd-send");
-        _recvSocket = new SecureSocket(privateKey, serverIP, recvPort);
+        _recvSocket = new SecureSocket(privateKey, serverIP, recvPort, "GCM");
         Log.log("connected: cmd-recv");
 
         addMsgRecviver();

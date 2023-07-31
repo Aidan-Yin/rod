@@ -206,7 +206,7 @@ public class TheServer {
                 }
                 while (true) {
                     try {
-                        _secureSocket_video = _serverSocket_video.accept(_vaildClients,new String[]{"GCM","OFB"});
+                        _secureSocket_video = _serverSocket_video.accept(_vaildClients, new String[] { "GCM", "OFB" });
                         Log.log("Connected with Client: video");
                         new Thread(() -> {
                             Log.log("Begined to send screenshot");
@@ -223,7 +223,8 @@ public class TheServer {
                                 }
                             }
                         }).start();
-                    } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException
+                    } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+                            | InvalidKeySpecException
                             | SignatureException
                             | IOException e) {
                         e.printStackTrace();
@@ -250,7 +251,7 @@ public class TheServer {
                 }
                 while (true) {
                     try {
-                        _secureSocket_mouse = _serverSocket_mouse.accept(_vaildClients);
+                        _secureSocket_mouse = _serverSocket_mouse.accept(_vaildClients, new String[] { "GCM" });
                         Log.log("Connected with Client: Mouse");
                         new Thread(() -> {
                             while (true) {
@@ -266,7 +267,8 @@ public class TheServer {
                                 }
                             }
                         }).start();
-                    } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException
+                    } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+                            | InvalidKeySpecException
                             | SignatureException
                             | IOException e) {
                         e.printStackTrace();
