@@ -27,6 +27,8 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 /**
  * The server can receive files/commands from the client, access local files,
  * terminals, and pass the local screen to the client.
@@ -60,6 +62,8 @@ public class TheServer {
     private static double _screenHeight;
     private static double _screenWidth;
     private static Rectangle _screenRect;
+
+    private static ConcurrentLinkedQueue<byte[]> _screen_cache;
 
     private static String _help_doc = """
             Usage:
@@ -191,9 +195,33 @@ public class TheServer {
     }
 
     /**
+     * 
+     * @param num The number of shooter
+     * @param limit Upper limit of captured images
+     */
+    public static void addScreenShooter(int num, int limit) {
+        for (int i = 0; i < num; i++) {
+            new Thread(() -> {
+                for (;;) {
+                    try {
+                        if (_screen_cache.size() < limit) {
+                            _screen_cache.offer(getScreen(0.8));
+                        }
+                        Thread.sleep(10);
+                    } catch (IOException | InterruptedException e) {
+                        Log.log("Error: Can't capture the screen.");
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
+    }
+
+    /**
      * add video socket
      */
     public static void addVideoSocket() {
+        _screen_cache = new ConcurrentLinkedQueue<>();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -201,21 +229,24 @@ public class TheServer {
                     _serverSocket_video = new SecureServerSocket(_publicKey, _privateKey, _port_video);
                     Log.log("Built socket,waitting connection...: video");
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 while (true) {
                     try {
-                        _secureSocket_video = _serverSocket_video.accept(_vaildClients,new String[]{"GCM","OFB"});
+                        _secureSocket_video = _serverSocket_video.accept(_vaildClients, new String[] { "GCM", "OFB" });
                         Log.log("Connected with Client: video");
                         new Thread(() -> {
+                            addScreenShooter(4, 8);
                             Log.log("Begined to send screenshot");
                             while (true) {
                                 try {
                                     if (_secureSocket_video.isClosed())
                                         break;
-                                    _secureSocket_video.sendall(getScreen(0.8));
-                                    Thread.sleep(20);
+                                    System.out.println(_screen_cache.size());
+                                    if (!_screen_cache.isEmpty()) {
+                                        _secureSocket_video.sendall(_screen_cache.poll());
+                                    }
+                                    Thread.sleep(5);
                                 } catch (IllegalBlockSizeException | IOException | InterruptedException e) {
                                     e.printStackTrace();
                                     Log.log("Connection close: video");
@@ -223,7 +254,8 @@ public class TheServer {
                                 }
                             }
                         }).start();
-                    } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException
+                    } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+                            | InvalidKeySpecException
                             | SignatureException
                             | IOException e) {
                         e.printStackTrace();
@@ -245,7 +277,6 @@ public class TheServer {
                     _serverSocket_mouse = new SecureServerSocket(_publicKey, _privateKey, _port_mouse);
                     Log.log("Built socket,waitting connection...: mouse");
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 while (true) {
@@ -266,7 +297,8 @@ public class TheServer {
                                 }
                             }
                         }).start();
-                    } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException
+                    } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+                            | InvalidKeySpecException
                             | SignatureException
                             | IOException e) {
                         e.printStackTrace();

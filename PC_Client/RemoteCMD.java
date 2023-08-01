@@ -52,7 +52,6 @@ public class RemoteCMD extends JPanel {
                 _inputField.setText("");
             } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
                     | InvalidAlgorithmParameterException | IOException e1) {
-                // TODO Auto-generated catch block
                 e1.printStackTrace();
             }
         });

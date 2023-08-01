@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -87,7 +86,6 @@ public class LocalCMD {
                     _serverSocket_input = new SecureServerSocket(_publicKey, _privateKey, _port_input);
                     Log.log("Built socket,waitting connection...: cmd-input");
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 while (true) {
@@ -129,7 +127,6 @@ public class LocalCMD {
                     _serverSocket_output = new SecureServerSocket(_publicKey, _privateKey, _port_output);
                     Log.log("Built socket,waitting connection...: cmd-output");
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 while (true) {
@@ -182,7 +179,6 @@ public class LocalCMD {
                             _output_cache.offer(line_msg);
                         }
                     } catch (IOException | InterruptedException e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                 }
@@ -207,7 +203,6 @@ public class LocalCMD {
                             _output_cache.offer(line_msg);
                         }
                     } catch (IOException | InterruptedException e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                 }
