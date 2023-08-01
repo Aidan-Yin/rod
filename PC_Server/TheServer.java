@@ -281,7 +281,7 @@ public class TheServer {
                 }
                 while (true) {
                     try {
-                        _secureSocket_mouse = _serverSocket_mouse.accept(_vaildClients);
+                        _secureSocket_mouse = _serverSocket_mouse.accept(_vaildClients, new String[] { "GCM" });
                         Log.log("Connected with Client: Mouse");
                         new Thread(() -> {
                             while (true) {

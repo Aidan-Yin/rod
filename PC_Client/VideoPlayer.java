@@ -34,12 +34,11 @@ public class VideoPlayer extends JPanel {
      */
     public VideoPlayer(PrivateKey privateKey, String serverIP, int serverPort) throws Exception {
         setBackground(Color.BLACK);
-        _socket = new SecureSocket(privateKey, serverIP, serverPort);
+        _socket = new SecureSocket(privateKey, serverIP, serverPort, "GCM");
         Log.log("connected: mouse");
         _mouseQueue = new ConcurrentLinkedQueue<>();
         addMouseTracker();
         addMouseEventSender();
-        ;
     }
 
     /**
