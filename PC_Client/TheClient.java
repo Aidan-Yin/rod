@@ -1,34 +1,30 @@
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.swing.JFrame;
 
 import java.awt.GridBagLayout;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Properties;
 import java.awt.GridBagConstraints;
 
 /**
- * Client UI implement
+ * Client UI implement, extends from {@link UIFrame}.
  * 
  * @author a-lives
  * @className TheClient
- * @version 1.0
- * @date 2023-7-22
+ * @version 1.14514
+ * @date 2023-8-2
  */
 
 public class TheClient extends UIFrame {
 
     private RemoteCMD _rcmd;
     private VideoPlayer _vsr;
+    private ClientSettingPanel _csp;
     // private DropPanel _dropPanel;
 
     private PrivateKey _privateKey;
@@ -38,46 +34,49 @@ public class TheClient extends UIFrame {
     private int _serverPort_cmd_input;
     private int _serverPort_cmd_output;
 
+    private String _settingPath = "ClientSetting.properties";
+
     /**
      * Initialization
      * 
      * @throws Exception
      */
     public TheClient() throws Exception {
-        super("Rod-Client", 0.7, 0.8);
+        super("Rod-Client", 0.8, 0.8);
 
-        loadSettingFromProp("");
+        loadSettingFromProp(_settingPath);
 
         _rcmd = new RemoteCMD(_privateKey, _serverIP, _serverPort_cmd_input, _serverPort_cmd_output);
-        _vsr = new VideoPlayer(_privateKey, _serverIP, _serverPort_mouse);
+        _vsr = new VideoPlayer(_privateKey, _serverIP, _serverPort_video, _serverPort_mouse);
+        _csp = new ClientSettingPanel((int) (getWidth() * 0.2), getHeight());
         // _dropPanel = new DropPanel("Rod-Client");
 
         // initalize GridBagLayout
         GridBagLayout gridBagLayout = new GridBagLayout();
         gridBagLayout.columnWidths = new int[] { 0, 0 };
         gridBagLayout.rowHeights = new int[] { 0, 0 };
-        gridBagLayout.columnWeights = new double[] { 0.7, 0.3 };
+        gridBagLayout.columnWeights = new double[] { 0.8, 0.2 };
         gridBagLayout.rowWeights = new double[] { 0.8, 0.2 };
         setLayout(gridBagLayout);
 
         GridBagConstraints constraints = new GridBagConstraints();
-        // constraints.gridx = 1;
-        // constraints.gridy = 0;
-        // constraints.gridwidth = 1;
-        // constraints.gridheight = 2;
-        // constraints.fill = GridBagConstraints.BOTH;
-        // add(_dropPanel, constraints);
+        constraints.gridx = 1;
+        constraints.gridy = 0;
+        constraints.gridwidth = 1;
+        constraints.gridheight = 2;
+        constraints.fill = GridBagConstraints.BOTH;
+        add(_csp, constraints);
 
         constraints.gridx = 0;
         constraints.gridy = 0;
-        constraints.gridwidth = 2;
+        constraints.gridwidth = 1;
         constraints.gridheight = 1;
         constraints.fill = GridBagConstraints.BOTH;
         add(_vsr, constraints);
 
         constraints.gridx = 0;
         constraints.gridy = 1;
-        constraints.gridwidth = 2;
+        constraints.gridwidth = 1;
         constraints.gridheight = 1;
         constraints.fill = GridBagConstraints.BOTH;
         add(_rcmd, constraints);
@@ -86,7 +85,7 @@ public class TheClient extends UIFrame {
     }
 
     /**
-     * load settings
+     * load settings from a properties file, if not, load default values.
      * 
      * @param path setting file path
      * @throws FileNotFoundException
@@ -97,8 +96,12 @@ public class TheClient extends UIFrame {
     public void loadSettingFromProp(String path)
             throws FileNotFoundException, IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         Properties prop = new Properties();
-        if (!path.equals("")) {
+        File file = new File(path);
+        if (file.exists()) {
             prop.load(new FileInputStream(path));
+            Log.log("Loaded settings: Client");
+        } else {
+            Log.log("Not found setting file, loaded default values: Client");
         }
         // load basic args
         _privateKey = RSA.getPrivateKeyFromBase64(prop.getProperty("privateKey",
@@ -106,56 +109,14 @@ public class TheClient extends UIFrame {
         _serverIP = prop.getProperty("serverIP", "127.0.0.1");
         _serverPort_video = Integer.parseInt(prop.getProperty("serverPort_video", "8080"));
         _serverPort_mouse = Integer.parseInt(prop.getProperty("serverPort_mouse", "8081"));
-        _serverPort_cmd_input = Integer.parseInt(prop.getProperty("serverPort_cmd", "8082"));
-        _serverPort_cmd_output = Integer.parseInt(prop.getProperty("serverPort_cmd", "8083"));
-        Log.log("loaded settings");
-    }
-
-    /**
-     * get img from server and play on a JPanelr
-     * 
-     * @throws IOException
-     * @throws InvalidKeyException
-     * @throws IllegalBlockSizeException
-     * @throws BadPaddingException
-     * @throws InvalidAlgorithmParameterException
-     * @throws NoSuchAlgorithmException
-     * @throws InvalidKeySpecException
-     * @throws NoSuchPaddingException
-     * @throws SignatureException
-     */
-    public void play() throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
-            InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException,
-            NoSuchPaddingException, SignatureException {
-        SecureSocket socket = new SecureSocket(_privateKey, _serverIP, _serverPort_video, "OFB");
-        Log.log("connected: video");
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        Thread.sleep(20);
-                        if (socket.isClosed())
-                            break;
-                        byte[] data = socket.recvall();
-                        _vsr.setImageFromBytes(data);
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        break;
-                    }
-                }
-            }
-
-        }).start();
-        // socket.close();
+        _serverPort_cmd_input = Integer.parseInt(prop.getProperty("serverPort_cmd_input", "8082"));
+        _serverPort_cmd_output = Integer.parseInt(prop.getProperty("serverPort_cmd_output", "8083"));
     }
 
     public static void main(String[] args) {
         try {
             TheClient theClient = new TheClient();
             theClient.setVisible(true);
-            theClient.play();
         } catch (Exception e) {
             e.printStackTrace();
         }

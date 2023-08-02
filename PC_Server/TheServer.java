@@ -6,11 +6,13 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Enumeration;
+
 import java.util.Properties;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.awt.Rectangle;
 import java.awt.Robot;
@@ -35,8 +37,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * 
  * @author a-lives, Yin
  * @className TheServer
- * @version 1.1
- * @date 2023-7-29
+ * @version 1.14514
+ * @date 2023-8-2
  */
 
 public class TheServer {
@@ -64,7 +66,10 @@ public class TheServer {
     private static Rectangle _screenRect;
 
     private static ConcurrentLinkedQueue<byte[]> _screen_cache;
+    private static int _ShooterNum;
+    private static int _ScreenCacheLimit;
 
+    private static String _settingPath = "ServerSetting.properties";
     private static String _help_doc = """
             Usage:
                 rod <command> [options]
@@ -73,6 +78,7 @@ public class TheServer {
                 launch                  Start the rod server.
                 set                     Change setting parameter.
                 args                    Show settings.
+                nkeys                   Generate a new key-pair(rsa).
             Options:
                 <launch>
                     --disable-video     Disable video connection.
@@ -95,8 +101,12 @@ public class TheServer {
     public static void loadSettingFromProp(String path)
             throws NoSuchAlgorithmException, InvalidKeySpecException, FileNotFoundException, IOException, AWTException {
         _prop = new Properties();
-        if (!path.equals("")) {
+        File file = new File(path);
+        if (file.exists()) {
             _prop.load(new FileInputStream(path));
+            Log.log("Loaded settings: Server");
+        } else {
+            Log.log("Not found setting file, loaded default values: Server");
         }
         // load basic args
         _privateKey = RSA.getPrivateKeyFromBase64(_prop.getProperty("privateKey",
@@ -107,9 +117,11 @@ public class TheServer {
                 "MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAlXFBhw7G0bpbtUOe5BPMxq11WtpJkVWOx5biiPX7GySeCHV6uoCip127E6j1L/XqHTDzErm93G/6eEtntjt7IvD9RoYkloBZLfevNuo7NzqFuIJu3y/y/u73mHC9sVU4mNuse93yPuMio+GEiKaDcrIFZmxXkeyhVnCxcXA+ISc2I/Ripwo19oahlihSMgNZP5IPDCGahASk3414eyk/W8asGTvN11PiEW+8xNFfwjDF9pBiIAOZaRk6HvhLQTJhQKN9sKy+333FffihS387R8IU1WevF8q8CUkNbq7FBFFUJDketaALABXSGgExW9KQdaHiDyps7XNHcQzOxre7VjPUACHuUgefS7a6bM5zVU3bjizD0PtaglwFNje47D4jvF6qgu8MSf1ZTqv5EWH/PpW/T39K11tJFGI3yAfyQzmyFqPOZqq1zBNcC5F2CFKp26td9z1+a86jBTqJ8crfeqOE26LdiB2esBAC0E1oIpC/HAvMZoMo2Cb320rL6zHwfaqmV3yE8M2BNj1RODmgZTVsOSmoLgPijdigB/PIEXt2OwLuBq4WXO5AH095xy591BISeTYaePyMOlKsGZtR2wnlcbNRx2D+gi9pkRWbbFhaHwy8RP8oOjf4qV1DHTrutB3d/KLo7CpCAN8dOftmpAswc6+++kVnV/SqW7FDCWMCAwEAAQ==")
                 .split(",");
         _port_video = Integer.parseInt(_prop.getProperty("port_video", "8080"));
-        _port_mouse = Integer.parseInt(_prop.getProperty("port_video", "8081"));
-        _port_cmd_input = Integer.parseInt(_prop.getProperty("port_cmd", "8082"));
-        _port_cmd_output = Integer.parseInt(_prop.getProperty("port_cmd", "8083"));
+        _port_mouse = Integer.parseInt(_prop.getProperty("port_mouse", "8081"));
+        _port_cmd_input = Integer.parseInt(_prop.getProperty("port_cmd_input", "8082"));
+        _port_cmd_output = Integer.parseInt(_prop.getProperty("port_cmd_output", "8083"));
+        _ShooterNum = Integer.parseInt(_prop.getProperty("shooter_num", "4"));
+        _ScreenCacheLimit = Integer.parseInt(_prop.getProperty("screen_cache_limit", "8"));
 
         // useful robot
         Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
@@ -196,7 +208,7 @@ public class TheServer {
 
     /**
      * 
-     * @param num The number of shooter
+     * @param num   The number of shooter
      * @param limit Upper limit of captured images
      */
     public static void addScreenShooter(int num, int limit) {
@@ -227,7 +239,7 @@ public class TheServer {
             public void run() {
                 try {
                     _serverSocket_video = new SecureServerSocket(_publicKey, _privateKey, _port_video);
-                    Log.log("Built socket,waitting connection...: video");
+                    Log.log("Built socket,waitting connection...: video; Port: " + _port_video);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -236,13 +248,12 @@ public class TheServer {
                         _secureSocket_video = _serverSocket_video.accept(_vaildClients, new String[] { "GCM", "OFB" });
                         Log.log("Connected with Client: video");
                         new Thread(() -> {
-                            addScreenShooter(4, 8);
+                            addScreenShooter(_ShooterNum, _ScreenCacheLimit);
                             Log.log("Begined to send screenshot");
                             while (true) {
                                 try {
                                     if (_secureSocket_video.isClosed())
                                         break;
-                                    System.out.println(_screen_cache.size());
                                     if (!_screen_cache.isEmpty()) {
                                         _secureSocket_video.sendall(_screen_cache.poll());
                                     }
@@ -275,7 +286,7 @@ public class TheServer {
             public void run() {
                 try {
                     _serverSocket_mouse = new SecureServerSocket(_publicKey, _privateKey, _port_mouse);
-                    Log.log("Built socket,waitting connection...: mouse");
+                    Log.log("Built socket,waitting connection...: mouse; Port: " + _port_mouse);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -330,10 +341,21 @@ public class TheServer {
         _cmd_process.addOutputSocket();
     }
 
+    public static void saveSetting(String path) throws IOException, FileNotFoundException {
+        File file = new File(path);
+        if (file.exists()) {
+            FileOutputStream fos = new FileOutputStream(path);
+            _prop.store(fos, "setting");
+            fos.close();
+        } else {
+            Log.log("ERROR: not found properties file " + path);
+        }
+    }
+
     public static void main(String[] args) throws UnknownHostException, IOException, NoSuchAlgorithmException,
             InvalidKeySpecException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException,
             BadPaddingException, SignatureException, AWTException {
-        loadSettingFromProp("");
+        loadSettingFromProp(_settingPath);
         if (args.length == 0) {
             // System.out.println(_help_doc);
             // debug:
@@ -375,21 +397,31 @@ public class TheServer {
                         addCMDSocket();
                 }
                 case "set" -> {
-                    if (args.length < 2) {
-                        System.out.println("ERROR: not enough options.");
+                    if (args.length != 3) {
+                        System.out.println("ERROR: wrong number of parameters.");
                     } else {
-                        System.out.println(_help_doc);
+                        _prop.setProperty(args[1], args[2]);
+                        saveSetting(_settingPath);
                     }
                 }
                 case "args" -> {
                     if (args.length > 1) {
                         System.out.println("ERROR: the \"args\" command has no option.");
                     } else {
-                        Enumeration<Object> keys = _prop.keys();
-                        while (keys.hasMoreElements()) {
-                            Object key = keys.nextElement();
-                            System.out.println(key + _prop.getProperty((String) key));
+                        for (String key : _prop.stringPropertyNames()) {
+                            System.out.println(key + ": " + _prop.getProperty(key));
                         }
+                    }
+                }
+                case "nkeys" -> {
+                    if (args.length > 1) {
+                        System.out.println("ERROR: the \"nkeys\" command has no option.");
+                    } else {
+                        RSA rsa = new RSA(4096);
+                        System.out.println("newly generated private key: ");
+                        System.out.println(rsa.getBase64PrivateKey());
+                        System.out.println("newly generated private key: ");
+                        System.out.println(rsa.getBase64PublicKey());
                     }
                 }
                 default -> {

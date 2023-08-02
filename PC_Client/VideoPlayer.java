@@ -13,18 +13,20 @@ import java.security.PrivateKey;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * A control that is responsible for playing the server screen.
+ * A control that is responsible for playing the server screen and do mouse
+ * events.
  * 
  * @author a-lives
- * @className RemoteCMD
- * @version 1.0
- * @date 2023-7-22
+ * @className VideoPlayer
+ * @version 1.1
+ * @date 2023-8-2
  */
 
 public class VideoPlayer extends JPanel {
 
     private BufferedImage image;
-    private SecureSocket _socket;
+    private SecureSocket _socketMouse;
+    private SecureSocket _socketVideo;
     private ConcurrentLinkedQueue<String> _mouseQueue;
 
     /**
@@ -32,13 +34,23 @@ public class VideoPlayer extends JPanel {
      * 
      * @throws Exception
      */
-    public VideoPlayer(PrivateKey privateKey, String serverIP, int serverPort) throws Exception {
+    public VideoPlayer(PrivateKey privateKey, String serverIP, int serverPortVideo, int serverPortMouse)
+            throws Exception {
         setBackground(Color.BLACK);
-        _socket = new SecureSocket(privateKey, serverIP, serverPort, "GCM");
-        Log.log("connected: mouse");
-        _mouseQueue = new ConcurrentLinkedQueue<>();
-        addMouseTracker();
-        addMouseEventSender();
+        addVideoSocket(privateKey, serverIP, serverPortVideo);
+        addMouseSocket(privateKey, serverIP, serverPortMouse);
+    }
+
+    public void addMouseSocket(PrivateKey privateKey, String serverIP, int port) {
+        try {
+            _socketMouse = new SecureSocket(privateKey, serverIP, port, "GCM");
+            Log.log("connected: mouse");
+            _mouseQueue = new ConcurrentLinkedQueue<>();
+            addMouseTracker();
+            addMouseEventSender();
+        } catch (Exception e) {
+            Log.log("connection failed: mouse");
+        }
     }
 
     /**
@@ -110,10 +122,10 @@ public class VideoPlayer extends JPanel {
             public void run() {
                 while (true) {
                     try {
-                        Thread.sleep(20);
+                        Thread.sleep(10);
                         if (!_mouseQueue.isEmpty()) {
                             String signal = _mouseQueue.poll();
-                            _socket.sendall(signal.getBytes());
+                            _socketMouse.sendall(signal.getBytes());
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -124,13 +136,50 @@ public class VideoPlayer extends JPanel {
 
     }
 
+    public void addVideoSocket(PrivateKey privateKey, String serverIP, int port) {
+        try {
+            _socketVideo = new SecureSocket(privateKey, serverIP, port, "OFB");
+            Log.log("connected: video");
+            play();
+        } catch (Exception e) {
+            Log.log("connection failed: video");
+        }
+    }
+
+    public void play() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        Thread.sleep(5);
+                        if (_socketVideo.isClosed())
+                            break;
+                        byte[] data = _socketVideo.recvall();
+                        setImageFromBytes(data);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        break;
+                    }
+                }
+            }
+
+        }).start();
+        // socket.close();
+    }
+
+    public void reload(PrivateKey privateKey, String serverIP, int serverPortVideo, int serverPortMouse) {
+        addVideoSocket(privateKey, serverIP, serverPortVideo);
+        addMouseSocket(privateKey, serverIP, serverPortMouse);
+    }
+
     /**
      * Your own watch
      * 
      * @param imageData
      * @throws IOException
      */
-    public void setImageFromBytes(byte[] imageData) throws IOException {
+    private void setImageFromBytes(byte[] imageData) throws IOException {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(imageData);
         image = ImageIO.read(inputStream);
         repaint();

@@ -13,6 +13,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Dimension;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,17 +22,19 @@ import java.io.FileNotFoundException;
 import java.util.Properties;
 
 /**
- * Setting panel used to change setting
+ * Setting panel used to change setting.
+ * It is a frame.
  * 
  * @author a-lives
- * @version 1.0
- * @date 7-23
+ * @className SettingPanel
+ * @version 1.2
+ * @date 2023-8-2
  */
 public class SettingPanel extends JPanel {
 
     public static final double XPRO = 0.4;
     public static final double YPRO = 0.72;
-    private Properties _prop;
+    protected Properties _prop;
     private Font _firstTitleFont;
     private Font _secondTitleFont;
     private Font _contFont;
@@ -45,12 +48,10 @@ public class SettingPanel extends JPanel {
     /**
      * Initalization
      * 
-     * @param title
      * @param parent a UIFrame
      * @throws Exception
      */
-    public SettingPanel(String title, UIFrame parent) throws Exception {
-        _prop = loadSetting("setting.prop");
+    public SettingPanel(UIFrame parent) throws Exception {
         _width = parent.getWidth();
         _height = parent.getHeight();
         _firstTitleFont = new Font(null, Font.BOLD, (int) (_height * 0.03));
@@ -64,15 +65,34 @@ public class SettingPanel extends JPanel {
     }
 
     /**
+     * Initalization
+     * 
+     * @param width  panel width
+     * @param height panel height
+     * @throws Exception
+     */
+    public SettingPanel(int width, int height) throws Exception {
+        _width = width;
+        _height = height;
+        _firstTitleFont = new Font(null, Font.BOLD, (int) (_height * 0.03));
+        _secondTitleFont = new Font(null, Font.PLAIN, (int) (_height * 0.024));
+        _contFont = new Font(null, Font.PLAIN, (int) (_height * 0.022));
+        _spaceBetweenGroup = (int) (_height * 0.02);
+        _spaceBetweenSets = (int) (_height * 0.015);
+        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        this.setBackground(_backgroundColor);
+        this.setAlignmentX(Component.CENTER_ALIGNMENT);
+    }
+
+    /**
      * Setting group!
-     * 
-     * 
      */
     public class SettingGroup extends JPanel {
 
         /**
+         * a setting group.
          * 
-         * @param title
+         * @param title title
          */
         public SettingGroup(String title) {
             this.setBackground(_backgroundColor);
@@ -87,8 +107,8 @@ public class SettingPanel extends JPanel {
 
         /**
          * 
-         * @param key
-         * @param value
+         * @param key   the label of the check box
+         * @param value if <code>true</code>, is checked
          */
         public void addCheckBox(String key, boolean value) {
             JCheckBox cb = new JCheckBox(key, value);
@@ -105,8 +125,8 @@ public class SettingPanel extends JPanel {
 
         /**
          * 
-         * @param key
-         * @param values
+         * @param key    the label of the group
+         * @param values the values can be chosen
          * @param value  the value witch has been chosen
          */
         public void addRadioButtonGroup(String key, String[] values, String value) {
@@ -142,10 +162,10 @@ public class SettingPanel extends JPanel {
 
         /**
          * 
-         * @param key
-         * @param value
+         * @param key   the label of the text field
+         * @param value default value
          */
-        public void addTextArea(String key, String value) {
+        public void addTextField(String key, String value) {
             JLabel l = new JLabel(key + ": ");
             l.setForeground(_textColor);
             l.setFont(_secondTitleFont);
@@ -162,12 +182,49 @@ public class SettingPanel extends JPanel {
             this.add(Box.createVerticalStrut(_spaceBetweenSets));
         }
 
+        public void addKeyPairGenerator(){
+            JButton getButton = new JButton("get");
+            getButton.setSize((int) (_width * 0.03), (int) (_height * 9.3));
+            getButton.setBackground(_textColor);
+            getButton.setForeground(_backgroundColor);
+            JLabel priLab = new JLabel("privateKey: ");
+            JLabel pubLab = new JLabel("publicKey: ");
+            priLab.setForeground(_textColor);
+            priLab.setFont(_secondTitleFont);
+            pubLab.setForeground(_textColor);
+            pubLab.setFont(_secondTitleFont);
+            JTextField priKey = new JTextField();
+            JTextField pubKey = new JTextField();
+            priKey.setEditable(false);
+            pubKey.setEditable(false);
+            priKey.setMaximumSize(new Dimension((int) (_width * 0.9), (int) (_height * 0.024)));
+            pubKey.setMaximumSize(new Dimension((int) (_width * 0.9), (int) (_height * 0.024)));
+            getButton.addActionListener(e->{
+                RSA rsa = new RSA(4096);
+                priKey.setText(rsa.getBase64PrivateKey());
+                pubKey.setText(rsa.getBase64PublicKey());
+            });
+            Box b1 = Box.createHorizontalBox();
+            Box b2 = Box.createHorizontalBox();
+            b1.add(priLab);
+            b1.add(priKey);
+            b2.add(pubLab);
+            b2.add(pubKey);
+            this.add(b1);
+            this.add(b2);
+            this.add(getButton);
+            b1.setAlignmentX(Component.LEFT_ALIGNMENT);
+            b2.setAlignmentX(Component.LEFT_ALIGNMENT);
+            getButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+            this.add(Box.createVerticalStrut(_spaceBetweenSets));
+        }
     }
 
     /**
      * 
      * @param title
-     * @return a class of SettingGroup, you can add some setting utils in it.
+     * @return a class of {@link SettingGroup}, you can add some setting utils in
+     *         it.
      */
     public SettingGroup addSettingGroup(String title) {
         SettingGroup sg = new SettingGroup(title);
@@ -177,17 +234,18 @@ public class SettingPanel extends JPanel {
     }
 
     /**
-     * add the save button.extremely important,must be called once
+     * add a <code>JButton</code> as save button. Extremely important, must be
+     * called once!
      */
-    public void addSaveButton() {
+    public void addSaveButton(String path) {
         JButton sb = new JButton("save");
         sb.setSize((int) (_width * 0.03), (int) (_height * 9.3));
         sb.setBackground(_textColor);
         sb.setForeground(_backgroundColor);
-        sb.setAlignmentX(LEFT_ALIGNMENT);
+        sb.setAlignmentX(Component.LEFT_ALIGNMENT);
         sb.addActionListener(e -> {
             try {
-                saveSetting("setting.prop");
+                saveSetting(path);
             } catch (FileNotFoundException exp) {
                 exp.printStackTrace();
             } catch (IOException ex) {
@@ -204,14 +262,14 @@ public class SettingPanel extends JPanel {
      * @param value
      */
     private void changeSetting(String key, String value) {
-        System.out.println(key + " is " + value);
+        Log.log("Changed: " + key + " is " + value);
         _prop.setProperty(key, value);
     }
 
     /**
-     * user to save setting to properties file
+     * use to save setting to properties file
      * 
-     * @param path
+     * @param path file path
      * @throws IOException
      * @throws FileNotFoundException
      */
@@ -219,19 +277,26 @@ public class SettingPanel extends JPanel {
         FileOutputStream fos = new FileOutputStream(path);
         _prop.store(fos, "setting");
         fos.close();
+        Log.log("Setting saved in " + path);
     }
 
     /**
      * use to load setting from properties file
      * 
-     * @param path
-     * @return
+     * @param path file path
+     * @return a <code>Properties</code>
      * @throws IOException
      * @throws FileNotFoundException
      */
     public Properties loadSetting(String path) throws IOException, FileNotFoundException {
         Properties prop = new Properties();
-        prop.load(new FileInputStream(path));
+        File file = new File(path);
+        if (file.exists()) {
+            prop.load(new FileInputStream(path));
+            Log.log("Loaded settings: Panel");
+        } else {
+            Log.log("Not found setting file, loaded default values: Panel");
+        }
         return prop;
     }
 }

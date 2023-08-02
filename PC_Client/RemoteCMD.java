@@ -20,8 +20,8 @@ import java.awt.GridBagConstraints;
  * 
  * @author a-lives
  * @className RemoteCMD
- * @version 1.1
- * @date 2023-7-29
+ * @version 1.2
+ * @date 2023-8-2
  */
 
 public class RemoteCMD extends JPanel {
@@ -80,10 +80,47 @@ public class RemoteCMD extends JPanel {
         add(_inputField, constraints);
 
         // bulid sockets
-        _sendSocket = new SecureSocket(privateKey, serverIP, sendPort, "GCM");
-        Log.log("connected: cmd-send");
-        _recvSocket = new SecureSocket(privateKey, serverIP, recvPort, "GCM");
-        Log.log("connected: cmd-recv");
+        try {
+            _sendSocket = new SecureSocket(privateKey, serverIP, sendPort, "GCM");
+            Log.log("connected: cmd-send");
+        } catch (Exception e) {
+            Log.log("connection failed: cmd-send");
+            return;
+        }
+        try {
+            _recvSocket = new SecureSocket(privateKey, serverIP, recvPort, "GCM");
+            Log.log("connected: cmd-recv");
+        } catch (Exception e) {
+            Log.log("connection failed: cmd-recv");
+            return;
+        }
+
+        addMsgRecviver();
+    }
+
+    /**
+     * Reload the remote cmd frame.
+     * 
+     * @param privateKey
+     * @param serverIP
+     * @param sendPort
+     * @param recvPort
+     */
+    public void reload(PrivateKey privateKey, String serverIP, int sendPort, int recvPort) {
+        try {
+            _sendSocket = new SecureSocket(privateKey, serverIP, sendPort, "GCM");
+            Log.log("connected: cmd-send");
+        } catch (Exception e) {
+            Log.log("connection failed: cmd-send");
+            return;
+        }
+        try {
+            _recvSocket = new SecureSocket(privateKey, serverIP, recvPort, "GCM");
+            Log.log("connected: cmd-recv");
+        } catch (Exception e) {
+            Log.log("connection failed: cmd-recv");
+            return;
+        }
 
         addMsgRecviver();
     }
@@ -103,7 +140,7 @@ public class RemoteCMD extends JPanel {
         _sendSocket.sendall(_inputField.getText().getBytes());
     }
 
-    public void addText(String content) {
+    private void addText(String content) {
         JViewport jv = _outputPane.getViewport();
         JTextArea jtp = (JTextArea) jv.getView();
         jtp.setText(jtp.getText() + "\n" + content);

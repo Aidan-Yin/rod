@@ -15,12 +15,13 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 /**
- * LocalCMD, use to bulid a cmd process.
+ * LocalCMD, use to bulid a cmd process and interact with remote client
+ * treminal.
  * 
  * @author a-lives
  * @className LocalCMD
- * @version 1.1
- * @date 2023-7-29
+ * @version 1.14
+ * @date 2023-8-2
  */
 public class LocalCMD {
 
@@ -84,7 +85,7 @@ public class LocalCMD {
             public void run() {
                 try {
                     _serverSocket_input = new SecureServerSocket(_publicKey, _privateKey, _port_input);
-                    Log.log("Built socket,waitting connection...: cmd-input");
+                    Log.log("Built socket,waitting connection...: cmd-input;Port: " + _port_input);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -125,7 +126,7 @@ public class LocalCMD {
             public void run() {
                 try {
                     _serverSocket_output = new SecureServerSocket(_publicKey, _privateKey, _port_output);
-                    Log.log("Built socket,waitting connection...: cmd-output");
+                    Log.log("Built socket,waitting connection...: cmd-output; Port: " + _port_output);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
