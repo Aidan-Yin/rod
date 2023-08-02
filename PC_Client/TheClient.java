@@ -22,19 +22,19 @@ import java.awt.GridBagConstraints;
 
 public class TheClient extends UIFrame {
 
-    private RemoteCMD _rcmd;
-    private VideoPlayer _vsr;
-    private ClientSettingPanel _csp;
+    public RemoteCMD _rcmd;
+    public VideoPlayer _vsr;
+    public ClientSettingPanel _csp;
     // private DropPanel _dropPanel;
 
-    private PrivateKey _privateKey;
-    private String _serverIP;
-    private int _serverPort_video;
-    private int _serverPort_mouse;
-    private int _serverPort_cmd_input;
-    private int _serverPort_cmd_output;
+    public PrivateKey _privateKey;
+    public String _serverIP;
+    public int _serverPort_video;
+    public int _serverPort_mouse;
+    public int _serverPort_cmd_send;
+    public int _serverPort_cmd_recv;
 
-    private String _settingPath = "ClientSetting.properties";
+    public String _settingPath = "ClientSetting.properties";
 
     /**
      * Initialization
@@ -46,9 +46,9 @@ public class TheClient extends UIFrame {
 
         loadSettingFromProp(_settingPath);
 
-        _rcmd = new RemoteCMD(_privateKey, _serverIP, _serverPort_cmd_input, _serverPort_cmd_output);
+        _rcmd = new RemoteCMD(_privateKey, _serverIP, _serverPort_cmd_send, _serverPort_cmd_recv);
         _vsr = new VideoPlayer(_privateKey, _serverIP, _serverPort_video, _serverPort_mouse);
-        _csp = new ClientSettingPanel((int) (getWidth() * 0.2), getHeight());
+        _csp = new ClientSettingPanel((int) (getWidth() * 0.2), getHeight(), _settingPath, this);
         // _dropPanel = new DropPanel("Rod-Client");
 
         // initalize GridBagLayout
@@ -109,8 +109,8 @@ public class TheClient extends UIFrame {
         _serverIP = prop.getProperty("serverIP", "127.0.0.1");
         _serverPort_video = Integer.parseInt(prop.getProperty("serverPort_video", "8080"));
         _serverPort_mouse = Integer.parseInt(prop.getProperty("serverPort_mouse", "8081"));
-        _serverPort_cmd_input = Integer.parseInt(prop.getProperty("serverPort_cmd_input", "8082"));
-        _serverPort_cmd_output = Integer.parseInt(prop.getProperty("serverPort_cmd_output", "8083"));
+        _serverPort_cmd_send = Integer.parseInt(prop.getProperty("serverPort_cmd_input", "8082"));
+        _serverPort_cmd_recv = Integer.parseInt(prop.getProperty("serverPort_cmd_output", "8083"));
     }
 
     public static void main(String[] args) {

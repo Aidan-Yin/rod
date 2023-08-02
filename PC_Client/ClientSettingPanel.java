@@ -1,15 +1,21 @@
+import java.awt.Component;
+import java.awt.event.ActionListener;
+
+import javax.swing.Box;
+import javax.swing.JButton;
+
 /**
  * The client setting panel. Extends from the {@link SettingPanel}
  * 
  * @author a-lives
  * @className ClientSettingPanel
- * @version 1.0
+ * @version 1.14514
  * @date 2023-8-2
  */
 
 public class ClientSettingPanel extends SettingPanel {
 
-    private String _settingPath = "ClientSetting.properties";
+    private String _settingPath;
 
     /**
      * Initalization
@@ -18,8 +24,9 @@ public class ClientSettingPanel extends SettingPanel {
      * @param height The height of the given space
      * @throws Exception
      */
-    public ClientSettingPanel(int width, int height) throws Exception {
+    public ClientSettingPanel(int width, int height, String settingPath, TheClient parent) throws Exception {
         super(width, height);
+        _settingPath = settingPath;
         _prop = loadSetting(_settingPath);
 
         // add SettingGroups
@@ -33,9 +40,30 @@ public class ClientSettingPanel extends SettingPanel {
         server_group.addTextField("serverPort:cmdInput", _prop.getProperty("serverPort_cmd_input", "8082"));
         server_group.addTextField("serverPort:cmdOutput", _prop.getProperty("serverPort_cmd_output", "8083"));
 
-        SettingPanel.SettingGroup rsa_gen = addSettingGroup("GetKeyPair(RSA)");
+        SettingPanel.SettingGroup rsa_gen = addSettingGroup("NewKeyPair(RSA)");
         rsa_gen.addKeyPairGenerator();
 
         addSaveButton(_settingPath);
+        addReloadButton("Reload:VideoPlayer", e -> {
+            parent._vsr.reload(parent._privateKey, parent._serverIP, parent._serverPort_video,
+                    parent._serverPort_mouse);
+        });
+        addReloadButton("Reload:cmd", e -> {
+            parent._rcmd.reload(parent._privateKey, parent._serverIP, parent._serverPort_cmd_send,
+                    parent._serverPort_cmd_recv);
+        });
+    }
+
+    public void addReloadButton(String name, ActionListener actionListener) {
+        JButton sb = new JButton(name);
+        sb.setSize((int) (_width * 0.03), (int) (_height * 9.3));
+        sb.setBackground(_textColor);
+        sb.setForeground(_backgroundColor);
+        sb.setAlignmentX(Component.LEFT_ALIGNMENT);
+        sb.addActionListener(e -> {
+            actionListener.actionPerformed(e);
+        });
+        add(sb);
+        add(Box.createVerticalStrut(_spaceBetweenGroup));
     }
 }

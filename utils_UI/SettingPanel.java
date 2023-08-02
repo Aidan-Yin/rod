@@ -35,15 +35,15 @@ public class SettingPanel extends JPanel {
     public static final double XPRO = 0.4;
     public static final double YPRO = 0.72;
     protected Properties _prop;
-    private Font _firstTitleFont;
-    private Font _secondTitleFont;
-    private Font _contFont;
-    private Color _backgroundColor = new Color(47, 54, 64);
-    private Color _textColor = new Color(220, 221, 225);
-    private int _width;
-    private int _height;
-    private int _spaceBetweenGroup;
-    private int _spaceBetweenSets;
+    protected Font _firstTitleFont;
+    protected Font _secondTitleFont;
+    protected Font _contFont;
+    protected Color _backgroundColor = new Color(47, 54, 64);
+    protected Color _textColor = new Color(220, 221, 225);
+    protected int _width;
+    protected int _height;
+    protected int _spaceBetweenGroup;
+    protected int _spaceBetweenSets;
 
     /**
      * Initalization
@@ -182,7 +182,7 @@ public class SettingPanel extends JPanel {
             this.add(Box.createVerticalStrut(_spaceBetweenSets));
         }
 
-        public void addKeyPairGenerator(){
+        public void addKeyPairGenerator() {
             JButton getButton = new JButton("get");
             getButton.setSize((int) (_width * 0.03), (int) (_height * 9.3));
             getButton.setBackground(_textColor);
@@ -199,7 +199,7 @@ public class SettingPanel extends JPanel {
             pubKey.setEditable(false);
             priKey.setMaximumSize(new Dimension((int) (_width * 0.9), (int) (_height * 0.024)));
             pubKey.setMaximumSize(new Dimension((int) (_width * 0.9), (int) (_height * 0.024)));
-            getButton.addActionListener(e->{
+            getButton.addActionListener(e -> {
                 RSA rsa = new RSA(4096);
                 priKey.setText(rsa.getBase64PrivateKey());
                 pubKey.setText(rsa.getBase64PublicKey());
@@ -253,6 +253,7 @@ public class SettingPanel extends JPanel {
             }
         });
         add(sb);
+        add(Box.createVerticalStrut(_spaceBetweenGroup));
     }
 
     /**
