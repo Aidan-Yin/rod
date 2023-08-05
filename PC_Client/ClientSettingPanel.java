@@ -1,16 +1,19 @@
 import java.awt.Component;
+import java.awt.Rectangle;
 import java.awt.event.ActionListener;
 
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
 
 /**
  * The client setting panel. Extends from the {@link SettingPanel}
  * 
  * @author a-lives
  * @className ClientSettingPanel
- * @version 1.14514
- * @date 2023-8-2
+ * @version 1.2
+ * @date 2023-8-5
  */
 
 public class ClientSettingPanel extends SettingPanel {
@@ -40,10 +43,23 @@ public class ClientSettingPanel extends SettingPanel {
         server_group.addTextField("serverPort:cmdInput", _prop.getProperty("serverPort_cmd_input", "8082"));
         server_group.addTextField("serverPort:cmdOutput", _prop.getProperty("serverPort_cmd_output", "8083"));
 
+        // add key pair generator
         SettingPanel.SettingGroup rsa_gen = addSettingGroup("NewKeyPair(RSA)");
         rsa_gen.addKeyPairGenerator();
 
-        addSaveButton(_settingPath);
+        // add savebutton and alert dialog.
+        JButton sb = addSaveButton(_settingPath);
+        sb.addActionListener(e -> {
+            JDialog dialog = new JDialog(parent, "!");
+            dialog.add(new JLabel("     Restart to apply the changes!"));
+            Rectangle rect = parent.getBounds();
+            dialog.setBounds((int) (rect.getCenterX() - rect.getWidth() * 0.1),
+                    (int) (rect.getCenterY() - rect.getHeight() * 0.08), (int) (rect.getWidth() * 0.2),
+                    (int) (rect.getHeight() * 0.16));
+            dialog.setVisible(true);
+        });
+
+        // add reload buttons
         addReloadButton("Reload:VideoPlayer", e -> {
             parent._vsr.reload(parent._privateKey, parent._serverIP, parent._serverPort_video,
                     parent._serverPort_mouse);

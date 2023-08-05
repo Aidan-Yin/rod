@@ -170,7 +170,13 @@ public class VideoPlayer extends JPanel {
 
     public void reload(PrivateKey privateKey, String serverIP, int serverPortVideo, int serverPortMouse) {
         addVideoSocket(privateKey, serverIP, serverPortVideo);
-        addMouseSocket(privateKey, serverIP, serverPortMouse);
+        try {
+            _socketMouse = new SecureSocket(privateKey, serverIP, serverPortMouse, "GCM");
+            Log.log("connected: mouse");
+            _mouseQueue = new ConcurrentLinkedQueue<>();
+        } catch (Exception e) {
+            Log.log("connection failed: mouse");
+        }
     }
 
     /**

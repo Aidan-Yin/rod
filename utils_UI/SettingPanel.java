@@ -237,7 +237,7 @@ public class SettingPanel extends JPanel {
      * add a <code>JButton</code> as save button. Extremely important, must be
      * called once!
      */
-    public void addSaveButton(String path) {
+    public JButton addSaveButton(String path) {
         JButton sb = new JButton("save");
         sb.setSize((int) (_width * 0.03), (int) (_height * 9.3));
         sb.setBackground(_textColor);
@@ -254,6 +254,7 @@ public class SettingPanel extends JPanel {
         });
         add(sb);
         add(Box.createVerticalStrut(_spaceBetweenGroup));
+        return sb;
     }
 
     /**
