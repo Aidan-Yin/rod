@@ -92,7 +92,7 @@ public class LocalCMD {
                 while (true) {
                     try {
                         _secureSocket_input = _serverSocket_input.accept(_vaildClients, new String[] { "GCM" });
-                        Log.log("Connected with Client: cmd-input");
+                        Log.log("Connected to Client: cmd-input");
                         new Thread(() -> {
                             while (true) {
                                 try {
@@ -133,7 +133,7 @@ public class LocalCMD {
                 while (true) {
                     try {
                         _secureSocket_output = _serverSocket_output.accept(_vaildClients, new String[] { "GCM" });
-                        Log.log("Connected with Client: cmd-output");
+                        Log.log("Connected to Client: cmd-output");
                         new Thread(() -> {
                             while (true) {
                                 try {

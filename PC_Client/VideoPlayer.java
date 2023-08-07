@@ -28,6 +28,7 @@ public class VideoPlayer extends JPanel {
     private SecureSocket _socketMouse;
     private SecureSocket _socketVideo;
     private ConcurrentLinkedQueue<String> _mouseQueue;
+    private int _limit = 10;
 
     /**
      * Initialization
@@ -107,7 +108,9 @@ public class VideoPlayer extends JPanel {
                 int h = VideoPlayer.this.getHeight();
                 int w = VideoPlayer.this.getWidth();
                 String signal = "" + x + "," + y + "," + w + "," + h + "," + button + "," + "M";
-                _mouseQueue.offer(signal);
+                if(!_mouseQueue.peek().split(",")[5].equals("M") || (_mouseQueue.size()<=_limit)){
+                    _mouseQueue.offer(signal);
+                }
             }
 
             @Override

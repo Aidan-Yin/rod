@@ -171,7 +171,7 @@ public class TheServer {
         g2d.drawImage(bufferedImage, 0, 0, newWidth, newHeight, null);
         g2d.dispose();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(lowerResolutionImage, "png", baos);
+        ImageIO.write(lowerResolutionImage, "jpg", baos);
         byte[] ba = baos.toByteArray();
         return ba;
     }
@@ -246,7 +246,7 @@ public class TheServer {
                 while (true) {
                     try {
                         _secureSocket_video = _serverSocket_video.accept(_vaildClients, new String[] { "GCM", "OFB" });
-                        Log.log("Connected with Client: video");
+                        Log.log("Connected to Client: video");
                         new Thread(() -> {
                             addScreenShooter(_ShooterNum, _ScreenCacheLimit);
                             Log.log("Begined to send screenshot");
@@ -270,6 +270,8 @@ public class TheServer {
                             | SignatureException
                             | IOException e) {
                         e.printStackTrace();
+                    } catch (RuntimeException e){
+                        Log.log("Accepting connection timeout: video");
                     }
                 }
             }
@@ -293,7 +295,7 @@ public class TheServer {
                 while (true) {
                     try {
                         _secureSocket_mouse = _serverSocket_mouse.accept(_vaildClients, new String[] { "GCM" });
-                        Log.log("Connected with Client: Mouse");
+                        Log.log("Connected to Client: Mouse");
                         new Thread(() -> {
                             while (true) {
                                 try {
@@ -313,6 +315,8 @@ public class TheServer {
                             | SignatureException
                             | IOException e) {
                         e.printStackTrace();
+                    } catch (RuntimeException e){
+                        Log.log("Accepting connection timeout: mouse");
                     }
                 }
             }
