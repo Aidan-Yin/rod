@@ -27,7 +27,7 @@ public class VideoPlayer extends JPanel {
     private BufferedImage image;
     private SecureSocket _socketMouse;
     private SecureSocket _socketVideo;
-    private ConcurrentLinkedQueue<String> _mouseQueue;
+    private final ConcurrentLinkedQueue<String> _mouseQueue = new ConcurrentLinkedQueue<>();
     private int _limit = 10;
 
     /**
@@ -44,7 +44,6 @@ public class VideoPlayer extends JPanel {
 
     public void addMouseSocket(PrivateKey privateKey, String serverIP, int port) {
         try {
-            _mouseQueue = new ConcurrentLinkedQueue<>();
             addMouseTracker();
             addMouseEventSender();
             _socketMouse = new SecureSocket(privateKey, serverIP, port, "GCM");
@@ -108,7 +107,7 @@ public class VideoPlayer extends JPanel {
                 int h = VideoPlayer.this.getHeight();
                 int w = VideoPlayer.this.getWidth();
                 String signal = "" + x + "," + y + "," + w + "," + h + "," + button + "," + "M";
-                if(!_mouseQueue.peek().split(",")[5].equals("M") || (_mouseQueue.size()<=_limit)){
+                if (!_mouseQueue.peek().split(",")[5].equals("M") || (_mouseQueue.size() <= _limit)) {
                     _mouseQueue.offer(signal);
                 }
             }
@@ -176,7 +175,7 @@ public class VideoPlayer extends JPanel {
         try {
             _socketMouse = new SecureSocket(privateKey, serverIP, serverPortMouse, "GCM");
             Log.log("connected: mouse");
-            _mouseQueue = new ConcurrentLinkedQueue<>();
+            _mouseQueue.clear();
         } catch (Exception e) {
             Log.log("connection failed: mouse");
         }

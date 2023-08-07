@@ -65,7 +65,7 @@ public class TheServer {
     private static double _screenWidth;
     private static Rectangle _screenRect;
 
-    private static ConcurrentLinkedQueue<byte[]> _screen_cache;
+    private static final ConcurrentLinkedQueue<byte[]> _screen_cache = new ConcurrentLinkedQueue<>();
     private static int _ShooterNum;
     private static int _ScreenCacheLimit;
 
@@ -233,7 +233,6 @@ public class TheServer {
      * add video socket
      */
     public static void addVideoSocket() {
-        _screen_cache = new ConcurrentLinkedQueue<>();
         new Thread(new Runnable() {
             @Override
             public void run() {

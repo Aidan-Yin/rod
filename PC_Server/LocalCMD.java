@@ -42,7 +42,7 @@ public class LocalCMD {
     private SecureSocket _secureSocket_output;
     private int _port_output;
 
-    private ConcurrentLinkedQueue<String> _output_cache;
+    private final ConcurrentLinkedQueue<String> _output_cache = new ConcurrentLinkedQueue<>();
 
     /**
      * 
@@ -72,7 +72,6 @@ public class LocalCMD {
         _outputStream = _process.getOutputStream();
         _inputStreamReader = new BufferedReader(new InputStreamReader(_process.getInputStream(), "GBK"));
         _errorStreamReader = new BufferedReader(new InputStreamReader(_process.getErrorStream(), "GBK"));
-        _output_cache = new ConcurrentLinkedQueue<>();
     }
 
     /**
