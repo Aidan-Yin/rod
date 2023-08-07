@@ -149,7 +149,7 @@ public class TheServer {
         g2d.drawImage(bufferedImage, 0, 0, newWidth, newHeight, null);
         g2d.dispose();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(lowerResolutionImage, "png", baos);
+        ImageIO.write(lowerResolutionImage, "jpg", baos);
         byte[] ba = baos.toByteArray();
         return ba;
     }
@@ -257,7 +257,7 @@ public class TheServer {
                                     if (!_screen_cache.isEmpty()) {
                                         _secureSocket_video.sendall(_screen_cache.poll());
                                     }
-                                    Thread.sleep(5);
+                                    Thread.sleep(50);
                                 } catch (IllegalBlockSizeException | IOException | InterruptedException e) {
                                     e.printStackTrace();
                                     Log.log("Connection close: video");

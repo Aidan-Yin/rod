@@ -23,7 +23,7 @@ import javax.crypto.IllegalBlockSizeException;
  * 
  * @author Yin
  * @className SecureSocket
- * @date 2023-7-30
+ * @date 2023-8-7
  */
 public class SecureSocket {
     public Socket _socket;
@@ -196,13 +196,6 @@ public class SecureSocket {
                     _outputStream.write(ciphertext);
                     break;
                 case "OFB":
-                    iv = new byte[16];
-                    random.nextBytes(iv);
-                    ciphertext = aes.encrypt(data, iv);
-                    _outputStream.write(ArrayUtils.intToBytes(iv.length + ciphertext.length));
-                    _outputStream.write(iv);
-                    _outputStream.write(ciphertext);
-                    break;
                 case "CBC":
                     iv = new byte[16];
                     random.nextBytes(iv);
@@ -244,12 +237,6 @@ public class SecureSocket {
                     ciphertext = Arrays.copyOfRange(rawData, 128, length);
                     return aes.decrypt(ciphertext, iv, aad);
                 case "OFB":
-                    iv = new byte[16];
-                    length = ArrayUtils.bytesToInt(SocketUtils.recvall(_inputStream, 4));
-                    rawData = SocketUtils.recvall(_inputStream, length);
-                    iv = Arrays.copyOfRange(rawData, 0, 16);
-                    ciphertext = Arrays.copyOfRange(rawData, 16, length);
-                    return aes.decrypt(ciphertext, iv);
                 case "CBC":
                     iv = new byte[16];
                     length = ArrayUtils.bytesToInt(SocketUtils.recvall(_inputStream, 4));

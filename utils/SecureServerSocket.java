@@ -20,13 +20,13 @@ import javax.crypto.IllegalBlockSizeException;
  * 
  * @author Yin
  * @className SecureServerSocket
- * @date 2023-7-30
+ * @date 2023-8-7
  */
 public class SecureServerSocket {
     public ServerSocket serverSocket;
     public PrivateKey _selfPrivateKey;
     public PublicKey _selfPublicKey;
-    public int TIMEOUT_PERIOD = 1000; // milliseconds
+    public int TIMEOUT_PERIOD = 3000; // milliseconds
 
     /**
      * Creates an unbound SecureServerSocket.
@@ -219,8 +219,8 @@ public class SecureServerSocket {
 
         // step 6
         PublicKey remoteKey;
-        for (int i = 0; i < arrayOfValidClientRSAkey.length; i++) {
-            remoteKey = RSA.getPublicKeyFromBase64(arrayOfValidClientRSAkey[i]);
+        for (String s : arrayOfValidClientRSAkey) {
+            remoteKey = RSA.getPublicKeyFromBase64(s);
             if (RSA.verify(temp, signature, remoteKey)) {
                 if (Arrays.asList(encryptionMode).contains(clientEncryptionMode)) {
                     cos.write("ok".getBytes());

@@ -5,4 +5,5 @@
     <string name="port1">Video port</string>
     <string name="port2">Mouse port</string>
     <string name="settings">Settings</string>
+    <string name="screenshotDescription">Screenshot from the server</string>
 </resources>

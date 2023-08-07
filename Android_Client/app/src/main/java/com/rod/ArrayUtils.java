@@ -1,13 +1,14 @@
 package com.rod;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * Some utils for array.
- * 
+ *
  * @author Yin
  * @className ArrayUtils
- * @date 2023-7-29
+ * @date 2023-8-7
  */
 public class ArrayUtils {
     public static byte[] arrayConcat(byte[]... bytes) {
@@ -29,24 +30,28 @@ public class ArrayUtils {
 
     public static byte[] longToBytes(long num){
         ByteBuffer byteBuffer = ByteBuffer.allocate(8);
+        byteBuffer.order(ByteOrder.BIG_ENDIAN);
         byteBuffer.putLong(num);
         return byteBuffer.array();
     }
-    
+
     public static long bytesToLong(byte[] bytes){
         ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+        byteBuffer.order(ByteOrder.BIG_ENDIAN);
         return byteBuffer.getLong();
     }
 
     public static byte[] intToBytes(int num){
         ByteBuffer byteBuffer = ByteBuffer.allocate(4);
+        byteBuffer.order(ByteOrder.BIG_ENDIAN);
         byteBuffer.putInt(num);
         return byteBuffer.array();
     }
-    
+
     public static int bytesToInt(byte[] bytes){
         ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+        byteBuffer.order(ByteOrder.BIG_ENDIAN);
         return byteBuffer.getInt();
     }
-
 }
+
