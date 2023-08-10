@@ -107,8 +107,10 @@ public class VideoPlayer extends JPanel {
                 int h = VideoPlayer.this.getHeight();
                 int w = VideoPlayer.this.getWidth();
                 String signal = "" + x + "," + y + "," + w + "," + h + "," + button + "," + "M";
-                if (!_mouseQueue.peek().split(",")[5].equals("M") || (_mouseQueue.size() <= _limit)) {
-                    _mouseQueue.offer(signal);
+                if (!_mouseQueue.isEmpty()) {
+                    if (!_mouseQueue.peek().split(",")[5].equals("M") || (_mouseQueue.size() <= _limit)) {
+                        _mouseQueue.offer(signal);
+                    }
                 }
             }
 

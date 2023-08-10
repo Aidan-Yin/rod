@@ -120,7 +120,7 @@ public class TheServer {
         _port_mouse = Integer.parseInt(_prop.getProperty("port_mouse", "8081"));
         _port_cmd_input = Integer.parseInt(_prop.getProperty("port_cmd_input", "8082"));
         _port_cmd_output = Integer.parseInt(_prop.getProperty("port_cmd_output", "8083"));
-        _ShooterNum = Integer.parseInt(_prop.getProperty("shooter_num", "4"));
+        _ShooterNum = Integer.parseInt(_prop.getProperty("shooter_num", "2"));
         _ScreenCacheLimit = Integer.parseInt(_prop.getProperty("screen_cache_limit", "8"));
 
         // useful robot
