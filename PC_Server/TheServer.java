@@ -393,8 +393,8 @@ public class TheServer {
                 }
                 case "launch" -> {
                     boolean[] options = { true, true, true }; // video,mouse,cmd
-                    for (String arg : args) {
-                        switch (arg) {
+                    for (int i=1;i<args.length;i++) {
+                        switch (args[i]) {
                             case "--disable-video" -> {
                                 options[0] = false;
                             }
@@ -408,7 +408,7 @@ public class TheServer {
                                 _debug = true;
                             }
                             default -> {
-                                System.out.println("ERROR: unknown option \"" + arg + "\".");
+                                System.out.println("ERROR: unknown option \"" + args[i] + "\".");
                                 return;
                             }
                         }
