@@ -20,11 +20,12 @@ import javax.crypto.NoSuchPaddingException;
  * 
  * @author a-lives
  * @className LocalCMD
- * @version 1.14
- * @date 2023-8-2
+ * @version 1.2
+ * @date 2023-8-12
  */
 public class LocalCMD {
 
+    public boolean _debug;
     public Process _process;
     public OutputStream _outputStream;
     public BufferedReader _inputStreamReader;
@@ -58,9 +59,11 @@ public class LocalCMD {
      * @throws SignatureException
      * @throws InvalidKeySpecException
      */
-    public LocalCMD(PrivateKey privateKey, PublicKey publicKey, String[] vaildClients, int port_input, int port_output)
+    public LocalCMD(boolean debug, PrivateKey privateKey, PublicKey publicKey, String[] vaildClients, int port_input,
+            int port_output)
             throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             IllegalBlockSizeException, BadPaddingException, SignatureException, InvalidKeySpecException {
+        _debug = debug;
         _privateKey = privateKey;
         _publicKey = publicKey;
         _vaildClients = vaildClients;
@@ -86,7 +89,8 @@ public class LocalCMD {
                     _serverSocket_input = new SecureServerSocket(_publicKey, _privateKey, _port_input);
                     Log.log("Built socket,waitting connection...: cmd-input;Port: " + _port_input);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    if (_debug)
+                        e.printStackTrace();
                 }
                 while (true) {
                     try {
@@ -102,7 +106,8 @@ public class LocalCMD {
                                     _outputStream.flush();
                                     Log.log("Received command: " + new String(signal));
                                 } catch (IllegalBlockSizeException | IOException e) {
-                                    e.printStackTrace();
+                                    if (_debug)
+                                        e.printStackTrace();
                                     Log.log("Connection close: cmd-input");
                                     break;
                                 }
@@ -112,7 +117,8 @@ public class LocalCMD {
                             | InvalidKeySpecException
                             | SignatureException
                             | IOException e) {
-                        e.printStackTrace();
+                        if (_debug)
+                            e.printStackTrace();
                     }
                 }
             }
@@ -127,7 +133,8 @@ public class LocalCMD {
                     _serverSocket_output = new SecureServerSocket(_publicKey, _privateKey, _port_output);
                     Log.log("Built socket,waitting connection...: cmd-output; Port: " + _port_output);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    if (_debug)
+                        e.printStackTrace();
                 }
                 while (true) {
                     try {
@@ -144,7 +151,8 @@ public class LocalCMD {
                                         Thread.sleep(20);
                                     }
                                 } catch (IllegalBlockSizeException | IOException | InterruptedException e) {
-                                    e.printStackTrace();
+                                    if (_debug)
+                                        e.printStackTrace();
                                     Log.log("Connection close: cmd-output");
                                     break;
                                 }
@@ -155,7 +163,8 @@ public class LocalCMD {
                             | InvalidKeySpecException
                             | SignatureException
                             | IOException e) {
-                        e.printStackTrace();
+                        if (_debug)
+                            e.printStackTrace();
                     }
                 }
             }
@@ -179,7 +188,8 @@ public class LocalCMD {
                             _output_cache.offer(line_msg);
                         }
                     } catch (IOException | InterruptedException e) {
-                        e.printStackTrace();
+                        if (_debug)
+                            e.printStackTrace();
                     }
                 }
             }
@@ -203,7 +213,8 @@ public class LocalCMD {
                             _output_cache.offer(line_msg);
                         }
                     } catch (IOException | InterruptedException e) {
-                        e.printStackTrace();
+                        if (_debug)
+                            e.printStackTrace();
                     }
                 }
             }

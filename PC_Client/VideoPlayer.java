@@ -18,11 +18,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * 
  * @author a-lives
  * @className VideoPlayer
- * @version 1.1
- * @date 2023-8-2
+ * @version 1.2
+ * @date 2023-8-12
  */
 
 public class VideoPlayer extends JPanel {
+
+    public boolean _debug;
 
     private BufferedImage image;
     private SecureSocket _socketMouse;
@@ -35,7 +37,7 @@ public class VideoPlayer extends JPanel {
      * 
      * @throws Exception
      */
-    public VideoPlayer(PrivateKey privateKey, String serverIP, int serverPortVideo, int serverPortMouse)
+    public VideoPlayer(boolean debug, PrivateKey privateKey, String serverIP, int serverPortVideo, int serverPortMouse)
             throws Exception {
         setBackground(Color.BLACK);
         addVideoSocket(privateKey, serverIP, serverPortVideo);
@@ -73,6 +75,7 @@ public class VideoPlayer extends JPanel {
                 };
                 String signal = "" + x + "," + y + "," + w + "," + h + "," + button + "," + "P";
                 _mouseQueue.offer(signal);
+                Log.debug(_debug, "Press: "+button);
             }
 
             @Override
@@ -89,6 +92,7 @@ public class VideoPlayer extends JPanel {
                 };
                 String signal = "" + x + "," + y + "," + w + "," + h + "," + button + "," + "R";
                 _mouseQueue.offer(signal);
+                Log.debug(_debug, "Release: "+button);
             }
         });
 
@@ -106,10 +110,14 @@ public class VideoPlayer extends JPanel {
                 int y = e.getY();
                 int h = VideoPlayer.this.getHeight();
                 int w = VideoPlayer.this.getWidth();
-                String signal = "" + x + "," + y + "," + w + "," + h + "," + button + "," + "M";
-                if (!_mouseQueue.isEmpty()) {
+                String signal = "" + x + "," + y + "," + w + "," + h + "," + button + "," + "D";
+                if (_mouseQueue.isEmpty()) {
+                    _mouseQueue.offer(signal);
+                    Log.debug(_debug, "Move!");
+                } else {
                     if (!_mouseQueue.peek().split(",")[5].equals("M") || (_mouseQueue.size() <= _limit)) {
                         _mouseQueue.offer(signal);
+                        Log.debug(_debug, "Move!");
                     }
                 }
             }

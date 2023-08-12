@@ -20,11 +20,13 @@ import java.awt.GridBagConstraints;
  * 
  * @author a-lives
  * @className RemoteCMD
- * @version 1.2
- * @date 2023-8-2
+ * @version 1.21
+ * @date 2023-8-12
  */
 
 public class RemoteCMD extends JPanel {
+
+    public boolean _debug;
 
     private JTextField _inputField;
     private JTextArea _outputArea;
@@ -33,7 +35,10 @@ public class RemoteCMD extends JPanel {
     private SecureSocket _sendSocket;
     private SecureSocket _recvSocket;
 
-    public RemoteCMD(PrivateKey privateKey, String serverIP, int sendPort, int recvPort) throws Exception {
+    public RemoteCMD(boolean debug, PrivateKey privateKey, String serverIP, int sendPort, int recvPort)
+            throws Exception {
+        _debug = debug;
+
         _inputField = new JTextField();
         _inputField.setEditable(true);
         _outputArea = new JTextArea();
@@ -160,7 +165,8 @@ public class RemoteCMD extends JPanel {
                         byte[] data = _recvSocket.recvall();
                         addText(new String(data));
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        if (_debug)
+                            e.printStackTrace();
                         break;
                     }
                 }
