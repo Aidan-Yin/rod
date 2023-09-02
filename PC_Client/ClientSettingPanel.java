@@ -1,11 +1,14 @@
 import java.awt.Component;
-import java.awt.Rectangle;
+// import java.awt.Rectangle;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
+// import javax.swing.JDialog;
+// import javax.swing.JLabel;
 
 /**
  * The client setting panel. Extends from the {@link SettingPanel}
@@ -50,13 +53,23 @@ public class ClientSettingPanel extends SettingPanel {
         // add savebutton and alert dialog.
         JButton sb = addSaveButton(_settingPath);
         sb.addActionListener(e -> {
-            JDialog dialog = new JDialog(parent, "!");
-            dialog.add(new JLabel("     Restart to apply the changes!"));
-            Rectangle rect = parent.getBounds();
-            dialog.setBounds((int) (rect.getCenterX() - rect.getWidth() * 0.1),
-                    (int) (rect.getCenterY() - rect.getHeight() * 0.08), (int) (rect.getWidth() * 0.2),
-                    (int) (rect.getHeight() * 0.16));
-            dialog.setVisible(true);
+            // method 1
+            
+            try {
+                parent.loadSettingFromProp(_settingPath);
+            } catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException e1) {
+                e1.printStackTrace();
+            } 
+
+            // method2
+
+            // JDialog dialog = new JDialog(parent, "!");
+            // dialog.add(new JLabel("     Restart to apply the changes!"));
+            // Rectangle rect = parent.getBounds();
+            // dialog.setBounds((int) (rect.getCenterX() - rect.getWidth() * 0.1),
+            //         (int) (rect.getCenterY() - rect.getHeight() * 0.08), (int) (rect.getWidth() * 0.2),
+            //         (int) (rect.getHeight() * 0.16));
+            // dialog.setVisible(true);
         });
 
         // add reload buttons
